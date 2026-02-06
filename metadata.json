@@ -1,0 +1,5 @@
+{
+  "name": "MBTI 타로운세",
+  "description": "An AI-powered Tarot reading application that interprets card spreads using Gemini to provide mystical insights in Korean.",
+  "requestFramePermissions": []
+}

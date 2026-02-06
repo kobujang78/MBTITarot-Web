@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI 찾기</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Screen 1: Start Screen -->
+    <div id="start-screen" class="screen active">
+        <div class="container">
+            <h1 class="title">MBTI 찾기</h1>
+            <div class="hero-image">
+                <img src="images/mbti_main.jpg" alt="MBTI Brain Illustration">
+            </div>
+            <h2 class="subtitle">나는 어떤 유형일까?</h2>
+            <p class="description">16가지 성격 유형 테스트로<br>진짜 나를 찾아보세요!</p>
+            <button class="primary-button" onclick="startQuiz()">퀴즈 시작하기</button>
+        </div>
+    </div>
+
+    <!-- Screen 2: Quiz Screen -->
+    <div id="quiz-screen" class="screen">
+        <div class="progress-section">
+            <div class="progress-text">20개의 질문 중 <span id="current-question">1</span>번째</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-percent" id="progress-percent">5%</div>
+        </div>
+        <div class="quiz-content">
+            <h3 class="question-text" id="question-text"></h3>
+            <div class="answers" id="answers"></div>
+        </div>
+        <button class="primary-button" id="next-button" onclick="nextQuestion()">다음</button>
+    </div>
+
+    <!-- Screen 3: Results Screen -->
+    <div id="results-screen" class="screen">
+        <div class="results-header">
+            <h2 class="results-title">나의 MBTI 결과</h2>
+            <button class="share-button" onclick="shareResult()" title="공유하기">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 5.12548 15.0077 15.2491 15.0227 15.3711L7.08265 11.1631C6.56892 10.4413 5.74218 10 4.8 10C3.14315 10 2 11.3431 2 13C2 14.6569 3.14315 16 5 16C5.74218 16 6.56892 15.5587 7.08265 14.8369L15.0227 19.0289C15.0077 19.1509 15 19.2745 15 19.4C15 21.0569 16.3431 22.4 18 22.4C19.6569 22.4 21 21.0569 21 19.4C21 17.7431 19.6569 16.4 18 16.4C17.2578 16.4 16.4311 16.8413 15.9173 17.5631L7.97729 13.3711C7.99229 13.2491 8 13.1255 8 13C8 12.8745 7.99229 12.7509 7.97729 12.6289L15.9173 8.43686C16.4311 9.15866 17.2578 9.6 18 9.6"
+                        fill="currentColor" />
+                </svg>
+            </button>
+        </div>
+        <div class="result-content">
+            <div class="result-image">
+                <img id="result-image" src="" alt="MBTI Result">
+            </div>
+            <h1 class="result-subtitle" id="result-subtitle">성격 유형</h1>
+            <p class="result-description" id="result-description"></p>
+        </div>
+        <div class="result-actions">
+            <button class="primary-button" onclick="showDetail()">자세히 보기</button>
+            <button class="secondary-button" onclick="goToSignup()">돌아가기</button>
+        </div>
+    </div>
+
+    <!-- Screen 4: Detail Screen -->
+    <div id="detail-screen" class="screen">
+        <div class="detail-header">
+            <h1 class="detail-title" id="detail-title">MBTI</h1>
+            <button class="share-button" onclick="shareResult()" title="공유하기">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path
+                        d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 5.12548 15.0077 15.2491 15.0227 15.3711L7.08265 11.1631C6.56892 10.4413 5.74218 10 4.8 10C3.14315 10 2 11.3431 2 13C2 14.6569 3.14315 16 5 16C5.74218 16 6.56892 15.5587 7.08265 14.8369L15.0227 19.0289C15.0077 19.1509 15 19.2745 15 19.4C15 21.0569 16.3431 22.4 18 22.4C19.6569 22.4 21 21.0569 21 19.4C21 17.7431 19.6569 16.4 18 16.4C17.2578 16.4 16.4311 16.8413 15.9173 17.5631L7.97729 13.3711C7.99229 13.2491 8 13.1255 8 13C8 12.8745 7.99229 12.7509 7.97729 12.6289L15.9173 8.43686C16.4311 9.15866 17.2578 9.6 18 9.6"
+                        fill="currentColor" />
+                </svg>
+            </button>
+        </div>
+        <div class="detail-content">
+            <div class="detail-image">
+                <img id="detail-image" src="" alt="MBTI Detail">
+            </div>
+            <section class="detail-section">
+                <h3 class="section-title">MBTI 특징</h3>
+                <p class="detail-text" id="detail-description"></p>
+            </section>
+            <section class="detail-section traits">
+                <div class="trait-column">
+                    <h4 class="trait-title">
+                        <span class="trait-icon blue">✨</span>
+                        강점
+                    </h4>
+                    <ul class="trait-list" id="strengths-list"></ul>
+                </div>
+                <div class="trait-column">
+                    <h4 class="trait-title">
+                        <span class="trait-icon red">😥</span>
+                        약점
+                    </h4>
+                    <ul class="trait-list" id="weaknesses-list"></ul>
+                </div>
+            </section>
+            <section class="detail-section">
+                <h3 class="section-title">대표적인 인물</h3>
+                <div class="famous-people" id="famous-people"></div>
+            </section>
+            <section class="detail-section">
+                <h3 class="section-title">잘 맞는 궁합</h3>
+                <p class="detail-text" id="compatible-text"></p>
+            </section>
+            <button class="primary-button full-width" onclick="closeModal()">돌아가기</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
