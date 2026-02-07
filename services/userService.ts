@@ -1,38 +1,51 @@
-import { db } from './firebase';
-import {
-    doc,
-    getDoc,
-    setDoc,
-    updateDoc,
-    collection,
-    query,
-    where,
-    getDocs,
-    runTransaction,
-    increment,
-    serverTimestamp
-} from 'firebase/firestore';
+import { supabase } from './supabase';
 import { UserProfile, CRYSTALS_CONFIG } from '../types';
 
 /**
- * Check if a nickname already exists in the 'users' collection
+ * Check if a nickname already exists in the 'profiles' table
  */
 export const checkNicknameExists = async (nickname: string): Promise<boolean> => {
-    const q = query(collection(db, 'users'), where('nickname', '==', nickname));
-    const querySnapshot = await getDocs(q);
-    return !querySnapshot.empty;
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('nickname')
+        .eq('nickname', nickname)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Error checking nickname:", error);
+        return false;
+    }
+    return !!data;
 };
 
 /**
- * Get user profile from Firestore
+ * Get user profile from Supabase
  */
 export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
-    const userRef = doc(db, 'users', uid);
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) {
-        const data = userSnap.data() as any;
-        const crystals = data.crystals || 0;
-        return { ...data, crystals } as UserProfile;
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', uid)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Error fetching user profile:", error);
+        return null;
+    }
+
+    if (data) {
+        // Map snake_case to camelCase
+        return {
+            uid: data.id,
+            email: data.email,
+            nickname: data.nickname,
+            mbti: data.mbti,
+            crystals: data.crystals || 0,
+            referredBy: data.referred_by,
+            lastLoginDate: data.last_login_date,
+            createdAt: new Date(data.created_at).getTime(),
+            totalCount: data.total_count
+        } as UserProfile;
     }
     return null;
 };
@@ -47,31 +60,30 @@ export const registerUser = async (
     mbti: string,
     referrerNickname?: string
 ) => {
-    const userRef = doc(db, 'users', uid);
     let initialCrystals = CRYSTALS_CONFIG.INITIAL;
-    let referrerUid = '';
+    let referrerUid = null;
 
     // 1. Try to find and reward referrer separately
     if (referrerNickname) {
         try {
-            const q = query(collection(db, 'users'), where('nickname', '==', referrerNickname));
-            const querySnapshot = await getDocs(q);
+            const { data: referrerData } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('nickname', referrerNickname)
+                .maybeSingle();
 
-            if (!querySnapshot.empty) {
-                const referrerDoc = querySnapshot.docs[0];
-                referrerUid = referrerDoc.id;
-
-                // If we found a valid referrer, the NEW user gets the reward
+            if (referrerData) {
+                referrerUid = referrerData.id;
                 initialCrystals += CRYSTALS_CONFIG.REFERRAL_REWARD;
 
-                // Attempt to reward the referrer - this might fail due to security rules
-                // but we wrap it in try-catch so it doesn't block registration
-                try {
-                    await updateDoc(doc(db, 'users', referrerUid), {
-                        crystals: increment(CRYSTALS_CONFIG.REFERRAL_REWARD)
-                    });
-                } catch (err) {
-                    console.warn("Could not reward referrer due to permissions, but proceeding with registration:", err);
+                // Reward the referrer
+                const { error: rewardError } = await supabase.rpc('increment_crystals', {
+                    user_id: referrerUid,
+                    amount: CRYSTALS_CONFIG.REFERRAL_REWARD
+                });
+
+                if (rewardError) {
+                    console.warn("Could not reward referrer, but proceeding:", rewardError);
                 }
             }
         } catch (err) {
@@ -79,84 +91,87 @@ export const registerUser = async (
         }
     }
 
-    // 2. Create the new user - this is the critical part
-    const newUser: UserProfile = {
-        uid,
+    // 2. Create the new user profile
+    const newUser = {
+        id: uid,
         email,
         nickname,
         mbti,
         crystals: initialCrystals,
-        referredBy: referrerNickname || undefined,
-        lastLoginDate: new Date().toISOString().split('T')[0],
-        createdAt: Date.now(),
-        totalCount: 1
+        referred_by: referrerNickname || null,
+        last_login_date: new Date().toISOString().split('T')[0],
+        total_count: 1
     };
 
-    await setDoc(userRef, newUser);
+    const { error } = await supabase
+        .from('profiles')
+        .insert(newUser);
+
+    if (error) {
+        console.error("Registration failed:", error);
+        throw error;
+    }
 };
 
 /**
  * Handle Daily Login Reward
- * Returns true if reward was given, false otherwise
  */
 export const handleDailyLoginReward = async (uid: string): Promise<boolean> => {
-    const userRef = doc(db, 'users', uid);
     const today = new Date().toISOString().split('T')[0];
 
-    return await runTransaction(db, async (transaction) => {
-        const userSnap = await transaction.get(userRef);
-        if (!userSnap.exists()) return false;
+    // Check if already claimed today
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('last_login_date')
+        .eq('id', uid)
+        .single();
 
-        const userData = userSnap.data() as UserProfile;
-        if (userData.lastLoginDate !== today) {
-            transaction.update(userRef, {
-                crystals: increment(CRYSTALS_CONFIG.DAILY_LOGIN),
-                lastLoginDate: today
-            });
-            return true; // Reward given
-        }
-        return false; // Already claimed today
-    });
+    if (profile && profile.last_login_date !== today) {
+        const { error } = await supabase
+            .from('profiles')
+            .update({
+                crystals: supabase.rpc('increment', { row_id: uid, column_name: 'crystals', amount: CRYSTALS_CONFIG.DAILY_LOGIN }),
+                last_login_date: today
+            })
+            .eq('id', uid);
+
+        // Use a simpler approach if RPC is not preferred for single update
+        const { error: updateError } = await supabase.rpc('handle_daily_login', {
+            profile_id: uid,
+            today_date: today,
+            reward_amount: CRYSTALS_CONFIG.DAILY_LOGIN
+        });
+
+        return !updateError;
+    }
+    return false;
 };
 
 /**
- * Deduct a crystal from user's account
+ * Deduct crystals from user's account
  */
 export const deductCrystal = async (uid: string, amount: number = 1): Promise<boolean> => {
-    const userRef = doc(db, 'users', uid);
+    const { error } = await supabase.rpc('deduct_crystals', {
+        user_id: uid,
+        amount: amount
+    });
 
-    try {
-        await runTransaction(db, async (transaction) => {
-            const userSnap = await transaction.get(userRef);
-            if (!userSnap.exists()) throw new Error("User does not exist");
-
-            const userData = userSnap.data() as any;
-            const currentCrystals = userData.crystals || 0;
-
-            if (currentCrystals < amount) {
-                throw new Error("Insufficient crystals");
-            }
-
-            transaction.update(userRef, {
-                crystals: increment(-amount)
-            });
-        });
-        return true;
-    } catch (error) {
+    if (error) {
         console.error("Deduction failed:", error);
         return false;
     }
+    return true;
 };
+
 /**
  * Increment total visit count for the user
  */
 export const incrementVisitCount = async (uid: string) => {
-    const userRef = doc(db, 'users', uid);
-    try {
-        await updateDoc(userRef, {
-            totalCount: increment(1)
-        });
-    } catch (error) {
+    const { error } = await supabase.rpc('increment_visit_count', {
+        user_id: uid
+    });
+
+    if (error) {
         console.error("Increment visit count failed:", error);
     }
 };
@@ -168,6 +183,17 @@ export const updateUserProfile = async (
     uid: string,
     data: { nickname?: string, mbti?: string }
 ): Promise<void> => {
-    const userRef = doc(db, 'users', uid);
-    await updateDoc(userRef, data);
+    const updateData: any = {};
+    if (data.nickname) updateData.nickname = data.nickname;
+    if (data.mbti) updateData.mbti = data.mbti;
+
+    const { error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', uid);
+
+    if (error) {
+        console.error("Update profile failed:", error);
+        throw error;
+    }
 };

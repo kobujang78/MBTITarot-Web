@@ -1,23 +1,4 @@
-import { db } from './firebase';
-import {
-    collection,
-    addDoc,
-    getDocs,
-    getDoc,
-    doc,
-    query,
-    where,
-    orderBy,
-    limit,
-    serverTimestamp,
-    updateDoc,
-    deleteDoc,
-    increment,
-    runTransaction,
-    Timestamp,
-    startAfter,
-    QueryConstraint
-} from 'firebase/firestore';
+import { supabase } from './supabase';
 import { Post, Comment, PostCategory } from '../types';
 
 /**
@@ -34,20 +15,25 @@ export const createPost = async (
 ): Promise<string> => {
     try {
         const postData = {
-            authorUid,
-            authorNickname,
-            authorMbti,
+            author_id: authorUid,
+            author_nickname: authorNickname,
+            author_mbti: authorMbti,
             title,
             content,
             category,
             likes: 0,
-            commentCount: 0,
-            createdAt: serverTimestamp(),
-            sharedTarot: sharedTarot || null
+            comment_count: 0,
+            shared_tarot: sharedTarot || null
         };
 
-        const docRef = await addDoc(collection(db, 'posts'), postData);
-        return docRef.id;
+        const { data, error } = await supabase
+            .from('posts')
+            .insert(postData)
+            .select('id')
+            .single();
+
+        if (error) throw error;
+        return data.id;
     } catch (error) {
         console.error("Error creating post:", error);
         throw error;
@@ -59,35 +45,41 @@ export const createPost = async (
  */
 export const getPosts = async (
     category?: PostCategory,
-    lastDoc?: any,
+    page: number = 0,
     pageSize: number = 20
-): Promise<{ posts: Post[], lastVisible: any }> => {
+): Promise<{ posts: Post[], hasMore: boolean }> => {
     try {
-        const constraints: QueryConstraint[] = [
-            orderBy('createdAt', 'desc'),
-            limit(pageSize)
-        ];
+        let query = supabase
+            .from('posts')
+            .select('*', { count: 'exact' })
+            .order('created_at', { ascending: false })
+            .range(page * pageSize, (page + 1) * pageSize - 1);
 
         if (category) {
-            constraints.unshift(where('category', '==', category));
+            query = query.eq('category', category);
         }
 
-        if (lastDoc) {
-            constraints.push(startAfter(lastDoc));
-        }
+        const { data, count, error } = await query;
 
-        const q = query(collection(db, 'posts'), ...constraints);
-        const querySnapshot = await getDocs(q);
+        if (error) throw error;
 
-        const posts: Post[] = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        })) as Post[];
+        const posts: Post[] = (data || []).map(post => ({
+            id: post.id,
+            authorUid: post.author_id,
+            authorNickname: post.author_nickname,
+            authorMbti: post.author_mbti,
+            title: post.title,
+            content: post.content,
+            category: post.category as PostCategory,
+            likes: post.likes,
+            commentCount: post.comment_count,
+            createdAt: post.created_at,
+            sharedTarot: post.shared_tarot
+        }));
 
-        return {
-            posts,
-            lastVisible: querySnapshot.docs[querySnapshot.docs.length - 1]
-        };
+        const hasMore = count ? (page + 1) * pageSize < count : false;
+
+        return { posts, hasMore };
     } catch (error) {
         console.error("Error fetching posts:", error);
         throw error;
@@ -104,13 +96,16 @@ export const updatePost = async (
     category: PostCategory
 ) => {
     try {
-        const postRef = doc(db, 'posts', postId);
-        await updateDoc(postRef, {
-            title,
-            content,
-            category,
-            updatedAt: serverTimestamp()
-        });
+        const { error } = await supabase
+            .from('posts')
+            .update({
+                title,
+                content,
+                category
+            })
+            .eq('id', postId);
+
+        if (error) throw error;
     } catch (error) {
         console.error("Error updating post:", error);
         throw error;
@@ -122,8 +117,12 @@ export const updatePost = async (
  */
 export const deletePost = async (postId: string) => {
     try {
-        const postRef = doc(db, 'posts', postId);
-        await deleteDoc(postRef);
+        const { error } = await supabase
+            .from('posts')
+            .delete()
+            .eq('id', postId);
+
+        if (error) throw error;
     } catch (error) {
         console.error("Error deleting post:", error);
         throw error;
@@ -135,10 +134,9 @@ export const deletePost = async (postId: string) => {
  */
 export const likePost = async (postId: string) => {
     try {
-        const postRef = doc(db, 'posts', postId);
-        await updateDoc(postRef, {
-            likes: increment(1)
-        });
+        const { error } = await supabase.rpc('increment_post_likes', { post_id: postId });
+
+        if (error) throw error;
     } catch (error) {
         console.error("Error liking post:", error);
         throw error;
@@ -155,34 +153,25 @@ export const addComment = async (
     content: string
 ): Promise<string> => {
     try {
-        return await runTransaction(db, async (transaction) => {
-            const postRef = doc(db, 'posts', postId);
-            const postSnap = await transaction.get(postRef);
+        const commentData = {
+            post_id: postId,
+            author_id: authorUid,
+            author_nickname: authorNickname,
+            content
+        };
 
-            if (!postSnap.exists()) {
-                throw new Error("Post does not exist");
-            }
+        const { data, error } = await supabase
+            .from('comments')
+            .insert(commentData)
+            .select('id')
+            .single();
 
-            // 1. Add comment
-            const commentData = {
-                postId,
-                authorUid,
-                authorNickname,
-                content,
-                createdAt: serverTimestamp()
-            };
+        if (error) throw error;
 
-            const commentsRef = collection(db, 'comments');
-            const newCommentRef = doc(commentsRef);
-            transaction.set(newCommentRef, commentData);
+        // Increment comment count on the post
+        await supabase.rpc('increment_post_comment_count', { post_id: postId });
 
-            // 2. Increment comment count
-            transaction.update(postRef, {
-                commentCount: increment(1)
-            });
-
-            return newCommentRef.id;
-        });
+        return data.id;
     } catch (error) {
         console.error("Error adding comment:", error);
         throw error;
@@ -194,17 +183,22 @@ export const addComment = async (
  */
 export const getComments = async (postId: string): Promise<Comment[]> => {
     try {
-        const q = query(
-            collection(db, 'comments'),
-            where('postId', '==', postId),
-            orderBy('createdAt', 'asc')
-        );
-        const querySnapshot = await getDocs(q);
+        const { data, error } = await supabase
+            .from('comments')
+            .select('*')
+            .eq('post_id', postId)
+            .order('created_at', { ascending: true });
 
-        return querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        })) as Comment[];
+        if (error) throw error;
+
+        return (data || []).map(comment => ({
+            id: comment.id,
+            postId: comment.post_id,
+            authorUid: comment.author_id,
+            authorNickname: comment.author_nickname,
+            content: comment.content,
+            createdAt: comment.created_at
+        }));
     } catch (error) {
         console.error("Error fetching comments:", error);
         throw error;

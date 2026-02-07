@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { UserProfile } from '../types';
 import { User, Sparkles, Calendar, Eye, ArrowLeft, LogOut, Award, Star, Edit2, Check, X as XIcon } from 'lucide-react';
 import Button from './Button';
-import { auth } from '../services/firebase';
-import { signOut } from 'firebase/auth';
+import { supabase } from '../services/supabase';
 import { MBTI_TYPES } from '../constants';
 import { checkNicknameExists, updateUserProfile } from '../services/userService';
 
@@ -283,7 +282,7 @@ const MyPage: React.FC<MyPageProps> = React.memo(({ userProfile, onBack }) => {
             <div className="flex flex-row gap-2">
                 <Button
                     variant="secondary"
-                    onClick={() => signOut(auth)}
+                    onClick={() => supabase.auth.signOut()}
                     className="flex items-center justify-center gap-1 bg-slate-800/80 border-slate-700 text-rose-400 flex-1 py-3 !px-0.5 !font-sans !tracking-normal hover:bg-rose-500/10 hover:border-rose-500/30"
                 >
                     <LogOut className="w-3.5 h-3.5 shrink-0" />

@@ -87,7 +87,7 @@ export interface Post {
   category: PostCategory;
   likes: number;
   commentCount: number;
-  createdAt: any; // Firestore Timestamp
+  createdAt: any; // ISO Date String
   sharedTarot?: string;
 }
 
@@ -97,5 +97,5 @@ export interface Comment {
   authorUid: string;
   authorNickname: string;
   content: string;
-  createdAt: any; // Firestore Timestamp
+  createdAt: any; // ISO Date String
 }

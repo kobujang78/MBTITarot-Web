@@ -9,9 +9,8 @@ import CardCarousel from './components/CardCarousel';
 import Button from './components/Button';
 import { handleDailyLoginReward, deductCrystal, incrementVisitCount } from './services/userService';
 import { LogOut, ChevronRight, ChevronLeft, ArrowLeft, RefreshCw, Sparkles, Check, Share2, Calendar, X, Trash2, ChevronDown, ChevronUp, BookOpen, User, Lock, AlertCircle, Moon, Stars, ArrowUp, RotateCcw, History, Search, Info, ShieldCheck, FileText, LogIn, MessageSquare, Download } from 'lucide-react';
-import { auth, db } from './services/firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { supabase } from './services/supabase';
+import { getUserProfile } from './services/userService';
 import { Post, UserProfile } from './types';
 
 const AuthModal = React.lazy(() => import('./components/AuthModal'));
@@ -136,8 +135,10 @@ const App: React.FC = () => {
     setHistory(getReadingsFromStorage());
 
     // Listen to Auth State
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const user = session?.user;
       setCurrentUser(user);
+
       if (user) {
         // --- Absolute Session Timeout (2 Hours) ---
         const loginTimeStr = localStorage.getItem('sessionLoginTime');
@@ -147,7 +148,7 @@ const App: React.FC = () => {
         if (loginTimeStr) {
           const loginTime = parseInt(loginTimeStr, 10);
           if (now - loginTime > TWO_HOURS) {
-            await signOut(auth);
+            await supabase.auth.signOut();
             localStorage.removeItem('sessionLoginTime');
             alert("보안을 위해 세션이 만료되어 로그아웃되었습니다.");
             return;
@@ -157,26 +158,42 @@ const App: React.FC = () => {
         }
 
         // Handle daily login reward
-        const rewarded = await handleDailyLoginReward(user.uid);
+        const rewarded = await handleDailyLoginReward(user.id);
         if (rewarded) {
           console.log("Daily login reward granted!");
         }
 
         // Increment visit count once per session load
         if (!hasCountedVisit.current) {
-          incrementVisitCount(user.uid);
+          incrementVisitCount(user.id);
           hasCountedVisit.current = true;
         }
 
+        // Initial profile fetch
+        const profile = await getUserProfile(user.id);
+        if (profile) {
+          setUserProfile(profile);
+        }
+
         // Listen to User Profile Changes (Crystals, etc.)
-        const unsubscribeProfile = onSnapshot(doc(db, 'users', user.uid), (doc) => {
-          if (doc.exists()) {
-            const data = doc.data() as any;
-            const crystals = data.crystals || 0;
-            setUserProfile({ ...data, crystals } as UserProfile);
-          }
-        });
-        return () => unsubscribeProfile();
+        const profileSubscription = supabase
+          .channel(`profile:${user.id}`)
+          .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${user.id}`
+          }, async () => {
+            const updatedProfile = await getUserProfile(user.id);
+            if (updatedProfile) {
+              setUserProfile(updatedProfile);
+            }
+          })
+          .subscribe();
+
+        return () => {
+          profileSubscription.unsubscribe();
+        };
       } else {
         localStorage.removeItem('sessionLoginTime');
         setUserProfile(null);
@@ -184,7 +201,7 @@ const App: React.FC = () => {
     });
 
     return () => {
-      unsubscribeAuth();
+      authSubscription.unsubscribe();
       if (audioCtxRef.current) audioCtxRef.current.close().catch(() => { });
     };
   }, []);
@@ -197,7 +214,7 @@ const App: React.FC = () => {
       if (loginTimeStr) {
         const loginTime = parseInt(loginTimeStr, 10);
         if (Date.now() - loginTime > 2 * 60 * 60 * 1000) {
-          signOut(auth);
+          supabase.auth.signOut();
           localStorage.removeItem('sessionLoginTime');
           alert("보안을 위해 세션이 만료되었습니다. 다시 로그인해 주세요.");
         }
@@ -1288,7 +1305,7 @@ const App: React.FC = () => {
             <span className="text-[13px] font-bold text-slate-300 truncate max-w-[80px]">{userProfile.nickname}님</span>
           </button>
           <button
-            onClick={() => signOut(auth)}
+            onClick={() => supabase.auth.signOut()}
             className="p-0.5 hover:bg-white/10 rounded-full transition-colors text-slate-500 hover:text-slate-300"
             title="로그아웃"
           >
@@ -2258,6 +2275,10 @@ const App: React.FC = () => {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h2 className="text-xl font-bold text-white">커뮤니티</h2>
+        <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-2 px-3 py-1.5 bg-red-900/40 text-red-400 rounded-lg hover:bg-red-900/60 transition-colors border border-red-800/50">
+          <LogOut className="w-4 h-4" />
+          <span className="text-xs font-bold">로그아웃</span>
+        </button>
       </div>
 
       <BoardList
@@ -2452,5 +2473,7 @@ const App: React.FC = () => {
         }
       `}</style>
     </div>
-  );export default App;
-  
+  );
+};
+
+export default App;
