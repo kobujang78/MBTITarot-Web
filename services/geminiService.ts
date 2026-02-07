@@ -23,7 +23,7 @@ export const getTarotReading = async (
       return getMockReading(question, cards, mbti, moonData, readingTypeName, nickname);
     }
 
-    const ai = new GoogleGenAI({ apiKey: apiKey });
+    const ai = new GoogleGenAI(apiKey);
 
     const isLotto = readingTypeName === "로또운";
     const lottoInstructions = isLotto ? `
@@ -115,7 +115,7 @@ export const getTarotReading = async (
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         systemInstruction: `당신은 인간의 심리와 우주의 상징을 연결하는 고도의 타로 상담가입니다. 당신의 언어는 깊이가 있으며, ${userTitle}에게 단순한 예언이 아닌 성장을 위한 영감을 줍니다.`,
