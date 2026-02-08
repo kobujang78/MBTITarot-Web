@@ -26,5 +26,9 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "include": [
+    ".",
+    "custom.d.ts"
+  ]
 }

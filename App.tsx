@@ -255,13 +255,47 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Handle URL query parameters for external navigation (e.g. from MBTI test)
+  // Handle URL query parameters for external navigation (e.g. from MBTI test) & Deep Links
   useEffect(() => {
+    // 1. Handle Web Params
     const searchParams = new URLSearchParams(window.location.search);
     if (searchParams.get('signup') === 'true') {
       setIsAuthModalOpen(true);
-      // Clean up the URL to prevent reopening on refresh
       window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    // 2. Handle Native Deep Links (Capacitor)
+    if (window.Capacitor?.isNative) {
+      import('@capacitor/app').then(({ App }) => {
+        App.addListener('appUrlOpen', async (data) => {
+          console.log('App opened with URL:', data.url);
+          // Supabase handles the session exchange automatically if the URL fragment contains access_token
+          // But we need to ensure the URL is processed by Supabase client
+          if (data.url.includes('access_token') || data.url.includes('refresh_token')) {
+            // Extract the fragment and manually set session if needed, 
+            // or let supabase.auth.getSession() pick it up if it persists in local storage via the browser intent.
+            // A more robust way for Supabase + Capacitor:
+            try {
+              const url = new URL(data.url);
+              const params = new URLSearchParams(url.hash.substring(1)); // Hashes are usually where tokens are
+              const accessToken = params.get('access_token');
+              const refreshToken = params.get('refresh_token');
+
+              if (accessToken && refreshToken) {
+                await supabase.auth.setSession({
+                  access_token: accessToken,
+                  refresh_token: refreshToken
+                });
+                // Force reload user
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) setCurrentUser(user);
+              }
+            } catch (e) {
+              console.error("Deep link auth error:", e);
+            }
+          }
+        });
+      });
     }
   }, []);
 

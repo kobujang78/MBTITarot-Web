@@ -121,14 +121,21 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
         setError('');
         setIsLoading(true);
         try {
-            const { error: oauthError } = await supabase.auth.signInWithOAuth({
+            const isCapacitor = window.Capacitor?.isNative;
+            const redirectUrl = isCapacitor
+                ? 'com.honglabai.mbtitarot.app://google-auth'
+                : window.location.origin;
+
+            const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin
+                    redirectTo: redirectUrl,
+                    skipBrowserRedirect: isCapacitor // For native, we handle the open ourselves if needed, but Supabase SDK usually handles it. 
+                    // Actually, for Capacitor context with Supabase, standard practice is letting the browser open.
                 }
             });
             if (oauthError) throw oauthError;
-            // The logic continues in the useEffect after redirect
+            // The logic continues in the useEffect after redirect (App.tsx handles the callback)
         } catch (err: any) {
             console.error(err);
             setError('Google 로그인 중 오류가 발생했습니다.');
