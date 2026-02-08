@@ -1016,37 +1016,56 @@ const App: React.FC = () => {
       // 1. Title Construction: [Card Name + Position] : [Core Meaning]
       // Try to find the core keyword section from readingResult
       let coreKeywords = "결과를 확인해보세요.";
-      const keywordMatch = readingResult?.match(/핵심 키워드\s*\n+([^\n]+)/);
-      if (keywordMatch && keywordMatch[1]) {
-        coreKeywords = keywordMatch[1].replace(/[#*`\-]/g, '').trim();
+
+      // New Prompt Format uses Markdown Lists (* **Key**: Value)
+      // Extract the whole block under "핵심 키워드"
+      const keywordSectionMatch = readingResult?.match(/### 🗝️ 핵심 키워드 🗝️\s*([\s\S]*?)(?=###|$)/);
+      if (keywordSectionMatch && keywordSectionMatch[1]) {
+        const lines = keywordSectionMatch[1].trim().split('\n');
+        // Extract keywords from lines like "* **Key**: Value"
+        const extractedWords = lines
+          .map(line => line.replace(/^\*\s*/, '').replace(/\*\*/g, '').split(':')[0].trim()) // Get just the key "Key"
+          .filter(w => w && !w.startsWith('<') && w.length < 10);
+
+        if (extractedWords.length > 0) {
+          coreKeywords = extractedWords.slice(0, 3).join(', ');
+        } else {
+          // Fallback: just take the raw text if parsing fails
+          coreKeywords = keywordSectionMatch[1].replace(/[#*`\-]/g, '').replace(/\n+/g, ', ').trim().slice(0, 50);
+        }
       }
 
       // Card Info
       const card = selectedCards[0];
       const cardName = card ? card.nameKo.split('(')[0].trim() : "운명의 카드";
       const cardDirection = card?.isReversed ? "역방향" : "정방향";
-      // Use short meaning based on direction
-      const cardMeaning = card ? (card.isReversed ? card.meaningRev : card.meaningUp) : "";
 
-      // Title: 🔑 [Card Name] (Direction)
-      // "🔑 검 에이스 (역방향)"
+      // Title: [Card Name] (Direction)
       const titleText = `🔑 ${cardName} (${cardDirection})`;
 
       // Description: Core Keywords + Analysis Summary
-      // "명확한 사고, 결단력... \n\n상세 상황 분석 ✨ ..."
       let descText = "";
 
       // Add Keywords first
-      descText += `${coreKeywords}\n\n`;
+      if (coreKeywords && coreKeywords !== "결과를 확인해보세요.") {
+        descText += `✨ 키워드: ${coreKeywords}\n\n`;
+      }
 
-      // Add Analysis Summary (Extract '상세 상황 분석' section)
-      const analysisMatch = readingResult?.match(/상세 상황 분석\s*\n+([\s\S]+?)(?=\n\n###|$)/);
-      if (analysisMatch && analysisMatch[1]) {
-        const analysisRaw = analysisMatch[1].replace(/[#*`\-]/g, '').replace(/\n+/g, ' ').trim();
-        descText += `상세 상황 분석 ✨ ${analysisRaw.slice(0, 150)}...`;
+      // Add Analysis Summary (Dynamic Header Handling)
+      // Remove the "Core Keywords" section and "Output Format" overhead first
+      const cleanBody = readingResult
+        ?.replace(/### 🗝️ 핵심 키워드 🗝️[\s\S]*?(?=###|$)/, '') // Remove top keyword section completely
+        .replace(/###\s*[^#\n]+/g, '') // Remove all ### headers
+        .replace(/<[^>]+>/g, '') // Remove all HTML tags
+        .replace(/\*\*/g, '') // Remove bold
+        .replace(/\*/g, '') // Remove bullets
+        .replace(/\n+/g, ' ') // Collapse newlines
+        .trim();
+
+      if (cleanBody) {
+        descText += `${cleanBody.slice(0, 150)}...`;
       } else {
-        // Fallback if regex fails
-        descText += readingResult?.slice(0, 200).replace(/[#*`\-]/g, '') + "...";
+        descText += "타로 카드가 전하는 심층적인 메시지를 확인해보세요.";
       }
 
       window.Kakao.Share.sendDefault({
