@@ -118,7 +118,7 @@ export const getTarotReading = async (
         `;
 
         const response = await ai.models.generateContent({
-          model: 'gemini-1.5-flash',
+          model: 'gemini-2.5-flash',
           contents: prompt,
           config: {
             systemInstruction: `당신은 ${userTitle}의 성장을 돕는 신비로운 타로 마스터입니다. 고풍스러운 해요체를 사용하세요.`,
