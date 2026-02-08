@@ -595,10 +595,24 @@ const App: React.FC = () => {
 
       // 4. Actually deduct crystals
       isProcessingRef.current = true;
+      console.log(`[Crystal] Attempting deduction. User: ${currentUser.uid}, Amount: ${currentStepCost}, Current Balance: ${userProfile?.crystals}`);
+
+      // Strict Check: Refresh profile to ensure client has latest data
+      const freshProfile = await getUserProfile(currentUser.uid);
+      if (!freshProfile || freshProfile.crystals < currentStepCost) {
+        alert(`수정구슬이 부족합니다. (현재: ${freshProfile?.crystals ?? 0}개, 필요: ${currentStepCost}개)`);
+        isProcessingRef.current = false;
+        // Update local state to match reality
+        if (freshProfile) setUserProfile(freshProfile);
+        return;
+      }
+
       try {
-        const success = await deductCrystal(currentUser.uid, currentStepCost);
-        if (!success) {
-          alert("수정구슬 차감에 실패했습니다. 다시 시도해 주세요.");
+        const result = await deductCrystal(currentUser.uid, currentStepCost);
+        console.log(`[Crystal] Deduction result: ${JSON.stringify(result)}`);
+
+        if (!result.success) {
+          alert(`수정구슬 차감 실패: ${result.message || '알 수 없는 오류'}`);
           isProcessingRef.current = false;
           return;
         }

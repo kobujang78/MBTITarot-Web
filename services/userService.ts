@@ -150,17 +150,24 @@ export const handleDailyLoginReward = async (uid: string): Promise<boolean> => {
 /**
  * Deduct crystals from user's account
  */
-export const deductCrystal = async (uid: string, amount: number = 1): Promise<boolean> => {
-    const { error } = await supabase.rpc('deduct_crystals', {
+export const deductCrystal = async (uid: string, amount: number = 1): Promise<{ success: boolean; message?: string }> => {
+    const { data, error } = await supabase.rpc('deduct_crystals', {
         user_id: uid,
         amount: amount
     });
 
     if (error) {
-        console.error("Deduction failed:", error);
-        return false;
+        console.error("Deduction failed (RPC Error):", error);
+        return { success: false, message: error.message };
     }
-    return true;
+
+    // RPC returns boolean (true = success, false = insufficient funds/user not found)
+    if (data === false) {
+        console.warn("Deduction failed (Logic): Insufficient funds or user not found");
+        return { success: false, message: "수정구슬이 부족하거나 사용자를 찾을 수 없습니다." };
+    }
+
+    return { success: true };
 };
 
 /**
