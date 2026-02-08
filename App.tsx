@@ -8,7 +8,7 @@ import { getMoonData } from './services/astrologyService';
 import CardCarousel from './components/CardCarousel';
 import Button from './components/Button';
 import { handleDailyLoginReward, deductCrystal, incrementVisitCount } from './services/userService';
-import { LogOut, ChevronRight, ChevronLeft, ArrowLeft, RefreshCw, Sparkles, Check, Share2, Calendar, X, Trash2, ChevronDown, ChevronUp, BookOpen, User, Lock, AlertCircle, Moon, Stars, ArrowUp, RotateCcw, History, Search, Info, ShieldCheck, FileText, LogIn, MessageSquare, Download } from 'lucide-react';
+import { LogOut, ChevronRight, ChevronLeft, ArrowLeft, RefreshCw, Sparkles, Check, Share2, Calendar, X, Trash2, ChevronDown, ChevronUp, BookOpen, User, Lock, AlertCircle, Moon, Stars, ArrowUp, RotateCcw, History, Search, Info, ShieldCheck, FileText, LogIn, MessageSquare, Download, Home, Menu } from 'lucide-react';
 import { supabase } from './services/supabase';
 import { getUserProfile } from './services/userService';
 import { Post, UserProfile } from './types';
@@ -83,6 +83,7 @@ const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true); // Splash screen state
   const [activeNotice, setActiveNotice] = useState<'tos' | 'privacy' | null>(null); // Notice modal state
   const [isShareModalOpen, setIsShareModalOpen] = useState(false); // Share options modal state
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Auth & Profile State
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -137,6 +138,7 @@ const App: React.FC = () => {
     initializeAdMob();
 
     setHistory(getReadingsFromStorage());
+
 
     // Listen to Auth State
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -254,6 +256,17 @@ const App: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Auto-refresh profile every 30 seconds to keep crystal count in sync
+  useEffect(() => {
+    if (!currentUser) return;
+    const interval = setInterval(() => {
+      getUserProfile(currentUser.id).then(p => {
+        if (p) setUserProfile(p);
+      });
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [currentUser]);
 
   // Handle URL query parameters for external navigation (e.g. from MBTI test) & Deep Links
   useEffect(() => {
@@ -595,12 +608,12 @@ const App: React.FC = () => {
 
       // 4. Actually deduct crystals
       isProcessingRef.current = true;
-      console.log(`[Crystal] Attempting deduction. User: ${currentUser.uid}, Amount: ${currentStepCost}, Current Balance: ${userProfile?.crystals}`);
+      console.log(`[Crystal] Attempting deduction. User: ${currentUser.id}, Amount: ${currentStepCost}, Current Balance: ${userProfile?.crystals}`);
 
       // Strict Check: Refresh profile to ensure client has latest data
-      const freshProfile = await getUserProfile(currentUser.uid);
+      const freshProfile = await getUserProfile(currentUser.id);
       if (!freshProfile || freshProfile.crystals < currentStepCost) {
-        alert(`수정구슬이 부족합니다. (현재: ${freshProfile?.crystals ?? 0}개, 필요: ${currentStepCost}개)`);
+        alert(`수정구슬이 부족합니다.\n(현재: ${freshProfile?.crystals ?? 0}개, 필요: ${currentStepCost}개)\n[Debug: UID=${currentUser.id.substring(0, 8)}...]`);
         isProcessingRef.current = false;
         // Update local state to match reality
         if (freshProfile) setUserProfile(freshProfile);
@@ -608,7 +621,7 @@ const App: React.FC = () => {
       }
 
       try {
-        const result = await deductCrystal(currentUser.uid, currentStepCost);
+        const result = await deductCrystal(currentUser.id, currentStepCost);
         console.log(`[Crystal] Deduction result: ${JSON.stringify(result)}`);
 
         if (!result.success) {
@@ -2414,6 +2427,51 @@ const App: React.FC = () => {
         ></div>
       </div>
 
+      {/* Global Header for non-Intro pages */}
+      {
+        step !== AppStep.INTRO && (
+          <header className="fixed top-0 left-0 right-0 z-50 p-4 flex justify-between items-center pointer-events-none">
+            {/* Left: Home Button */}
+            <div className="pointer-events-auto">
+              <button
+                onClick={() => {
+                  const message = step === AppStep.READING
+                    ? "초기 화면으로 돌아가시겠습니까?"
+                    : "초기 화면으로 돌아가시겠습니까? 진행 중인 내용은 저장되지 않습니다.";
+
+                  if (confirm(message)) {
+                    setStep(AppStep.INTRO);
+                    setReadingResult(null);
+                    setSelectedCards([]);
+                    setIsHistoryMode(false);
+                  }
+                }}
+                className="p-2 bg-slate-900/40 backdrop-blur-md rounded-full text-slate-200 hover:bg-slate-800 hover:text-white transition-all border border-white/10 shadow-lg"
+              >
+                <Home className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Right: Crystal & Menu */}
+            <div className="pointer-events-auto flex items-center gap-3">
+              {currentUser && userProfile && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/40 backdrop-blur-md rounded-full border border-indigo-500/30 shadow-lg animate-fadeIn">
+                  <span className="text-sm shadow-sm">🔮</span>
+                  <span className="text-sm font-bold text-indigo-200 shadow-sm">{userProfile.crystals}개</span>
+                </div>
+              )}
+
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="p-2 bg-slate-900/40 backdrop-blur-md rounded-full text-slate-200 hover:bg-slate-800 hover:text-white transition-all border border-white/10 shadow-lg"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+            </div>
+          </header>
+        )
+      }
+
       {/* Main Content */}
       <main className="relative z-10 min-h-screen flex flex-col items-center justify-center p-2">
         {step === AppStep.INTRO && renderIntro()}
@@ -2531,7 +2589,7 @@ const App: React.FC = () => {
           opacity: 0;
         }
       `}</style>
-    </div>
+    </div >
   );
 };
 

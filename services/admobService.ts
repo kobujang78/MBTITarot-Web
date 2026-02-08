@@ -5,8 +5,11 @@ const isNative = () => {
     return Capacitor.isNativePlatform();
 };
 
-// Test IDs from Google
-const INTERSTITIAL_ID = 'ca-app-pub-3940256099942544/1033173712';
+// Test IDs from Google (Fallback)
+const TEST_INTERSTITIAL_ID = 'ca-app-pub-3940256099942544/1033173712';
+
+// Use environment variable if available, otherwise use Test ID
+const INTERSTITIAL_ID = import.meta.env.VITE_ADMOB_INTERSTITIAL_ID_ANDROID || TEST_INTERSTITIAL_ID;
 
 export const initializeAdMob = async () => {
     if (!isNative()) return;
