@@ -12,6 +12,7 @@ import { LogOut, ChevronRight, ChevronLeft, ArrowLeft, RefreshCw, Sparkles, Chec
 import { supabase } from './services/supabase';
 import { getUserProfile } from './services/userService';
 import { Post, UserProfile } from './types';
+import { initializeAdMob, showInterstitialAd } from './services/admobService';
 
 const AuthModal = React.lazy(() => import('./components/AuthModal'));
 const BoardList = React.lazy(() => import('./components/BoardList'));
@@ -131,6 +132,9 @@ const App: React.FC = () => {
         console.error("Kakao Init Failed", e);
       }
     }
+
+    // Initialize AdMob
+    initializeAdMob();
 
     setHistory(getReadingsFromStorage());
 
@@ -604,6 +608,13 @@ const App: React.FC = () => {
 
 
   const getReading = useCallback(async () => {
+    // Show AdMob Interstitial before reading
+    try {
+      await showInterstitialAd();
+    } catch (e) {
+      console.error("Ad show failed", e);
+    }
+
     setStep(AppStep.READING);
     setIsLoading(true);
     try {
