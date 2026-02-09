@@ -7,7 +7,7 @@ import { saveReadingToStorage, getReadingsFromStorage, deleteReadingFromStorage 
 import { getMoonData } from './services/astrologyService';
 import CardCarousel from './components/CardCarousel';
 import Button from './components/Button';
-import { handleDailyLoginReward, deductCrystal, incrementVisitCount } from './services/userService';
+import { handleDailyLoginReward, deductCrystal, incrementVisitCount, registerUser } from './services/userService';
 import { LogOut, ChevronRight, ChevronLeft, ArrowLeft, RefreshCw, Sparkles, Check, Share2, Calendar, X, Trash2, ChevronDown, ChevronUp, BookOpen, User, Lock, AlertCircle, Moon, Stars, ArrowUp, RotateCcw, History, Search, Info, ShieldCheck, FileText, LogIn, MessageSquare, Download, Home, Menu } from 'lucide-react';
 import { supabase } from './services/supabase';
 import { getUserProfile } from './services/userService';
@@ -176,7 +176,20 @@ const App: React.FC = () => {
         }
 
         // Initial profile fetch
-        const profile = await getUserProfile(user.id);
+        // Initial profile fetch
+        let profile = await getUserProfile(user.id);
+
+        // Auto-register if profile missing but metadata exists (from email signup)
+        if (!profile && user.user_metadata?.nickname) {
+          try {
+            const { nickname, mbti, referrer } = user.user_metadata;
+            await registerUser(user.id, user.email || '', nickname, mbti || 'INFP', referrer);
+            profile = await getUserProfile(user.id);
+          } catch (e) {
+            console.error("Auto-registration failed:", e);
+          }
+        }
+
         if (profile) {
           setUserProfile(profile);
         }

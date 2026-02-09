@@ -14,6 +14,7 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [nickname, setNickname] = useState('');
     const [mbti, setMbti] = useState('INFP');
     const [referrer, setReferrer] = useState('');
@@ -29,6 +30,7 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
         if (isOpen) {
             setIsLogin(true);
             setError('');
+            setConfirmPassword('');
             setAgreedTos(false);
             setAgreedPrivacy(false);
             setSocialUser(null);
@@ -92,6 +94,7 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
             } else {
                 // Sign Up Logic
                 if (!nickname) throw new Error('닉네임을 입력해주세요.');
+                if (password !== confirmPassword) throw new Error('비밀번호가 일치하지 않습니다.');
                 if (!agreedTos || !agreedPrivacy) throw new Error('이용약관 및 개인정보 처리방침에 동의해주세요.');
 
                 const exists = await checkNicknameExists(nickname);
@@ -106,15 +109,29 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                     email,
                     password,
                     options: {
-                        emailRedirectTo: redirectUrl
+                        emailRedirectTo: redirectUrl,
+                        data: {
+                            nickname,
+                            mbti,
+                            referrer
+                        }
                     }
                 });
 
                 if (signUpError) throw signUpError;
                 if (!data.user) throw new Error('회원가입 중 오류가 발생했습니다.');
 
-                // Register in Public Profiles
-                await registerUser(data.user.id, email, nickname, mbti, referrer);
+                // If email confirmation is enabled, session will be null.
+                if (data.user && !data.session) {
+                    alert('인증 메일이 발송되었습니다. 이메일을 확인하여 가입을 완료해주세요.');
+                    onClose();
+                    return;
+                }
+
+                // Session exists (auto-confirm or social login)
+                // We do NOT call registerUser here anymore because App.tsx handles it
+                // via onAuthStateChange -> auto-registration using metadata.
+                // This prevents race conditions and RLS errors.
                 onClose();
             }
         } catch (err: any) {
@@ -208,6 +225,20 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                                         required
                                         value={password}
                                         onChange={e => setPassword(e.target.value)}
+                                        className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-11 text-white focus:outline-none focus:border-indigo-500 transition-colors text-[13px]"
+                                    />
+                                </div>
+                            )}
+
+                            {!socialUser && !isLogin && (
+                                <div className="relative">
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                    <input
+                                        type="password"
+                                        placeholder="비밀번호 확인"
+                                        required
+                                        value={confirmPassword}
+                                        onChange={e => setConfirmPassword(e.target.value)}
                                         className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-11 text-white focus:outline-none focus:border-indigo-500 transition-colors text-[13px]"
                                     />
                                 </div>
