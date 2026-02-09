@@ -97,9 +97,17 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                 const exists = await checkNicknameExists(nickname);
                 if (exists) throw new Error('이미 사용 중인 닉네임입니다.');
 
+                const isCapacitor = window.Capacitor?.isNative;
+                const redirectUrl = isCapacitor
+                    ? 'com.honglabai.mbtitarot.app://login-callback'
+                    : window.location.origin;
+
                 const { data, error: signUpError } = await supabase.auth.signUp({
                     email,
                     password,
+                    options: {
+                        emailRedirectTo: redirectUrl
+                    }
                 });
 
                 if (signUpError) throw signUpError;

@@ -284,6 +284,26 @@ const App: React.FC = () => {
           console.log('App opened with URL:', data.url);
           // Supabase handles the session exchange automatically if the URL fragment contains access_token
           // But we need to ensure the URL is processed by Supabase client
+          // Handle PKCE 'code' flow (Email Confirmation, Password Reset, etc.)
+          if (data.url.includes('code=')) {
+            try {
+              const url = new URL(data.url);
+              // Search params are usually in the query string `?code=...` but checking both just in case
+              const code = url.searchParams.get('code');
+
+              if (code) {
+                const { data: sessionData, error } = await supabase.auth.exchangeCodeForSession(code);
+                if (error) throw error;
+                if (sessionData.user) setCurrentUser(sessionData.user);
+                alert("이메일 인증이 완료되었습니다! 환영합니다.");
+              }
+            } catch (e: any) {
+              console.error("Deep link PKCE code error:", e);
+              alert(`인증 처리 중 오류가 발생했습니다: ${e.message || 'Unknown Error'}`);
+            }
+          }
+
+          // Handle Implicit Flow (Legacy or specific provider settings)
           if (data.url.includes('access_token') || data.url.includes('refresh_token')) {
             // Extract the fragment and manually set session if needed, 
             // or let supabase.auth.getSession() pick it up if it persists in local storage via the browser intent.
