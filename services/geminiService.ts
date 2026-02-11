@@ -114,7 +114,9 @@ export const getTarotReading = async (
           (색상, 장소, 숫자 2개, 시간)
 
           ### 🌟 마치는 글 🌟
-          (따뜻한 격려와 축복 후 명언으로 마무리)
+          (따뜻한 격려와 축복)
+
+          > "(운명에 어울리는 세계적인 명언 한 구절)" - (명언을 남긴 인물)
         `;
 
         const response = await ai.models.generateContent({
@@ -172,6 +174,6 @@ ${mbti ? `### 🧠 ${mbti} 심층 분석
 
 ${closingMessage}
 
-> "${userTitle}의 오늘을 빛낼 한 문장의 명언" - 타로 마스터
+> "성공하기까지는 언제나 불가능해 보이기 마련이다." - 넬슨 만델라
 `;
 };

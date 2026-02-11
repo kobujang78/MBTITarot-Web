@@ -88,7 +88,51 @@ export const useShareManager = (
       ctx.fillStyle = '#f1f5f9';
       ctx.font = 'bold 35px sans-serif';
       ctx.fillText(card.nameKo.split('(')[0].trim(), x + cardWidth / 2, y + cardHeight + 60);
-      maxContentY = y + cardHeight + 155;
+      maxContentY = Math.max(maxContentY, y + cardHeight + 110);
+    }
+
+    // 유명인 명언 추출 및 그리기
+    const quoteMatch = readingResult.match(/>\s*"(.*?)"\s*-\s*(.*)/);
+    if (quoteMatch) {
+      const quoteText = quoteMatch[1].trim();
+      const authorText = quoteMatch[2].trim();
+
+      ctx.save();
+      ctx.textAlign = 'center';
+
+      // 명언 본문 (줄바꿈 처리)
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'italic 36px serif';
+
+      const maxWidth = 800;
+      const lineHeight = 50;
+      const words = quoteText.split(' ');
+      let line = '';
+      let lines = [];
+
+      for (let n = 0; n < words.length; n++) {
+        let testLine = line + words[n] + ' ';
+        let metrics = ctx.measureText(testLine);
+        let testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          lines.push(line);
+          line = words[n] + ' ';
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line);
+
+      let quoteY = maxContentY + 80;
+      lines.forEach((l, i) => {
+        ctx.fillText(`"${l.trim()}"`, canvas.width / 2, quoteY + (i * lineHeight));
+      });
+
+      // 명언을 한 인물
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '30px sans-serif';
+      ctx.fillText(`- ${authorText}`, canvas.width / 2, quoteY + (lines.length * lineHeight) + 20);
+      ctx.restore();
     }
 
     ctx.fillStyle = '#ffdd00ff';
