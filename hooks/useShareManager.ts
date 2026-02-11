@@ -164,21 +164,43 @@ export const useShareManager = (
   }, [selectedCards, selectedSpread, readingResult]);
 
   const shareToKakao = useCallback(async () => {
-    if (!window.Kakao) return;
+    if (!window.Kakao) {
+      console.error("Kakao SDK not loaded");
+      alert("카카오톡 SDK가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
+    if (!window.Kakao.isInitialized()) {
+      const KAKAO_KEY = '0398256e094e7a60932217b241aafdd6';
+      try {
+        window.Kakao.init(KAKAO_KEY);
+        console.log("Kakao SDK initialized on demand");
+      } catch (e) {
+        console.error("Kakao Init Failed", e);
+        return;
+      }
+    }
+
     const imageUrl = selectedCards.length > 0
       ? `https://mbtitarot.co.kr/image/${String(selectedCards[0].id).padStart(2, '0')}.jpg`
       : 'https://mbtitarot.co.kr/intro-landing.jpg';
 
-    window.Kakao.Share.sendDefault({
-      objectType: 'feed',
-      content: {
-        title: `🔑 ${selectedCards[0]?.nameKo.split('(')[0].trim() || "운명의 카드"}`,
-        description: "타로 카드가 전하는 심층적인 메시지를 확인해보세요.",
-        imageUrl: imageUrl,
-        link: { mobileWebUrl: 'https://mbtitarot.co.kr/', webUrl: 'https://mbtitarot.co.kr/' },
-      },
-      buttons: [{ title: '결과 보기', link: { mobileWebUrl: 'https://mbtitarot.co.kr/', webUrl: 'https://mbtitarot.co.kr/' } }],
-    });
+    try {
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: `🔑 ${selectedCards[0]?.nameKo.split('(')[0].trim() || "운명의 카드"}`,
+          description: "타로 카드가 전하는 심층적인 메시지를 확인해보세요.",
+          imageUrl: imageUrl,
+          link: { mobileWebUrl: 'https://mbtitarot.co.kr/', webUrl: 'https://mbtitarot.co.kr/' },
+        },
+        buttons: [{ title: '결과 보기', link: { mobileWebUrl: 'https://mbtitarot.co.kr/', webUrl: 'https://mbtitarot.co.kr/' } }],
+      });
+      console.log("Kakao share command sent");
+    } catch (error) {
+      console.error("Kakao Share Error:", error);
+      alert("카카오톡 공유 중 오류가 발생했습니다.");
+    }
   }, [selectedCards]);
 
   const performShare = useCallback(async (type: 'text' | 'image' | 'both') => {
