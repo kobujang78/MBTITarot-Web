@@ -88,7 +88,20 @@ export const useShareManager = (
       ctx.fillStyle = '#f1f5f9';
       ctx.font = 'bold 35px sans-serif';
       ctx.fillText(card.nameKo.split('(')[0].trim(), x + cardWidth / 2, y + cardHeight + 60);
-      maxContentY = Math.max(maxContentY, y + cardHeight + 110);
+
+      // 뽑은 방향 (Direction)
+      ctx.fillStyle = card.isReversed ? '#fca5a5' : '#6ee7b7';
+      ctx.font = 'bold 32px sans-serif';
+      ctx.fillText(card.isReversed ? '역방향' : '정방향', x + cardWidth / 2, y + cardHeight + 110);
+
+      // 카드 의미 (Meaning) - 한 줄 요약
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '26px sans-serif';
+      const meaning = card.isReversed ? card.meaningRev : card.meaningUp;
+      const shortMeaning = meaning.length > 20 ? meaning.substring(0, 18) + '...' : meaning;
+      ctx.fillText(shortMeaning, x + cardWidth / 2, y + cardHeight + 160);
+
+      maxContentY = Math.max(maxContentY, y + cardHeight + 220);
     }
 
     // 유명인 명언 추출 및 그리기
@@ -123,14 +136,14 @@ export const useShareManager = (
       }
       lines.push(line);
 
-      let quoteY = maxContentY + 80;
+      let quoteY = maxContentY + 60;
       lines.forEach((l, i) => {
         ctx.fillText(`"${l.trim()}"`, canvas.width / 2, quoteY + (i * lineHeight));
       });
 
       // 명언을 한 인물
       ctx.fillStyle = '#94a3b8';
-      ctx.font = '30px sans-serif';
+      ctx.font = '28px sans-serif';
       ctx.fillText(`- ${authorText}`, canvas.width / 2, quoteY + (lines.length * lineHeight) + 20);
       ctx.restore();
     }
@@ -162,14 +175,14 @@ export const useShareManager = (
         title: `🔑 ${selectedCards[0]?.nameKo.split('(')[0].trim() || "운명의 카드"}`,
         description: "타로 카드가 전하는 심층적인 메시지를 확인해보세요.",
         imageUrl: imageUrl,
-        link: { mobileWebUrl: 'https://www.mbtitarot.co.kr/', webUrl: 'https://www.mbtitarot.co.kr/' },
+        link: { mobileWebUrl: 'https://mbtitarot.co.kr/', webUrl: 'https://mbtitarot.co.kr/' },
       },
-      buttons: [{ title: '결과 보기', link: { mobileWebUrl: 'https://www.mbtitarot.co.kr/', webUrl: 'https://www.mbtitarot.co.kr/' } }],
+      buttons: [{ title: '결과 보기', link: { mobileWebUrl: 'https://mbtitarot.co.kr/', webUrl: 'https://mbtitarot.co.kr/' } }],
     });
   }, [selectedCards]);
 
   const performShare = useCallback(async (type: 'text' | 'image' | 'both') => {
-    const textToShare = `🔮 MBTI 타로운세 결과\nhttps://www.mbtitarot.co.kr/`;
+    const textToShare = `🔮 MBTI 타로운세 결과\nhttps://mbtitarot.co.kr/`;
     if (type === 'text') {
       if (navigator.share) await navigator.share({ text: textToShare });
       else {
