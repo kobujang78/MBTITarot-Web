@@ -68,13 +68,9 @@ const IntroScreen: React.FC<IntroScreenProps> = ({
             <button onClick={() => setStep(AppStep.MBTI_ABOUT)} className="hover:text-white transition-colors">MBTI란?</button>
             <button onClick={() => setStep(AppStep.TAROT_ABOUT)} className="hover:text-white transition-colors">타로란?</button>
             <a href="#faq" onClick={(e) => { e.preventDefault(); document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors">FAQ</a>
-            <button onClick={() => setStep(AppStep.COMMUNITY)} className="hover:text-white transition-colors">커뮤니티</button>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setStep(AppStep.COMMUNITY)} className="md:hidden flex items-center gap-1 text-slate-300 text-xs font-bold">
-            <MessageSquare className="w-4 h-4" />
-          </button>
         </div>
       </nav>
 

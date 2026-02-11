@@ -75,15 +75,6 @@ const App: React.FC = () => {
         <div className="absolute top-[20%] right-[20%] w-[30%] h-[30%] bg-blue-500/10 rounded-full blur-[100px]" style={{ opacity: 0.2 + (moonData.intensity * 0.2) }}></div>
       </div>
 
-      {step !== AppStep.INTRO && (
-        <header className="fixed top-0 left-0 right-0 z-50 p-4 flex justify-between items-center pointer-events-auto">
-          <button onClick={() => confirm("초기 화면으로 돌아가시겠습니까?") && resetApp()} className="p-2 bg-slate-900/40 backdrop-blur-md rounded-full text-slate-200 hover:bg-slate-800 hover:text-white transition-all border border-white/10 shadow-lg"><Home className="w-5 h-5" /></button>
-          <div className="flex items-center gap-3">
-            {userProfile && <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/40 backdrop-blur-md rounded-full border border-indigo-500/30 shadow-lg"><span className="text-sm">🔮</span><span className="text-sm font-bold text-indigo-200">{userProfile.crystals}개</span></div>}
-            <button onClick={() => setIsMenuOpen(true)} className="p-2 bg-slate-900/40 backdrop-blur-md rounded-full text-slate-200 hover:bg-slate-800 hover:text-white transition-all border border-white/10 shadow-lg"><Menu className="w-5 h-5" /></button>
-          </div>
-        </header>
-      )}
 
       <main className="relative z-10 min-h-screen flex flex-col items-center justify-center p-2">
         {step === AppStep.INTRO && <IntroScreen userProfile={userProfile} selectedMbti={selectedMbti} setSelectedMbti={setSelectedMbti} selectedSpread={selectedSpread} setSelectedSpread={setSelectedSpread} question={question} setQuestion={setQuestion} setStep={setStep} setIsAuthModalOpen={setIsAuthModalOpen} startShuffling={startShuffling} openHistory={() => setStep(AppStep.HISTORY)} spreadError={spreadError} setSpreadError={setSpreadError} renderUserBadge={renderUserBadge} GoogleAd={GoogleAd} LandingContent={LandingContent} />}
