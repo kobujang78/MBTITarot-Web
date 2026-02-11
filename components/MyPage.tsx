@@ -99,7 +99,7 @@ const MyPage: React.FC<MyPageProps> = React.memo(({ userProfile, onBack }) => {
     });
 
     return (
-        <div className="w-full max-w-2xl mx-auto px-4 py-4 animate-fadeIn">
+        <div className="w-full max-w-2xl mx-auto px-4 py-4 animate-fadeIn pb-32">
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
                 <button

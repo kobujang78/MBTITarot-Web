@@ -30,7 +30,7 @@ const ReadingScreen: React.FC<ReadingScreenProps> = ({
   shareToKakao, performShare, openHistory, handleResetClick, GoogleAd
 }) => {
   return (
-    <div className="flex flex-col items-center w-full max-w-6xl px-2 md:px-4 animate-fadeIn pb-20">
+    <div className="flex flex-col items-center w-full max-w-6xl px-2 md:px-4 animate-fadeIn pb-32">
       {!isLoading && (
         <div className={`grid ${selectedCards.length === 1 ? 'grid-cols-1' : selectedCards.length === 5 ? 'grid-cols-3 sm:grid-cols-5' : 'grid-cols-3'} gap-2 md:gap-4 mb-2 w-full max-w-4xl justify-items-center`}>
           {selectedCards.map((card, index) => (

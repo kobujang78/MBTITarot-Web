@@ -20,7 +20,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
   filteredHistory, loadHistoryItem, toggleHistoryExpand, expandedHistoryId, deleteHistoryItem
 }) => {
   return (
-    <div className="flex flex-col items-center w-full max-w-4xl px-4 animate-fadeIn h-[80vh]">
+    <div className="flex flex-col items-center w-full max-w-4xl px-4 animate-fadeIn h-[80vh] pb-32">
       <div className="flex items-center justify-between w-full mb-4 bg-slate-900/60 px-2 py-2.5 rounded-xl backdrop-blur-sm shadow-sm border border-slate-800">
         <button onClick={resetApp} className="text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1.5 font-bold text-[13px] shrink-0 whitespace-nowrap">
           <ArrowLeft className="w-4 h-4" /> 돌아가기

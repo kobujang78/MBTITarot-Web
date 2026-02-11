@@ -2,7 +2,7 @@ import React, { useRef, Suspense } from 'react';
 import { AppStep, TarotCard } from './types';
 import { APP_BACKGROUND_IMAGE_URL, MBTI_TYPES } from './constants';
 import { getMoonData } from './services/astrologyService';
-import { LogOut, User, X, FileText, ShieldCheck, AlertCircle, Home, Menu, Sparkles } from 'lucide-react';
+import { LogOut, User, X, FileText, ShieldCheck, AlertCircle, Home, Menu, Sparkles, History, ArrowLeft } from 'lucide-react';
 import { supabase } from './services/supabase';
 
 // Hooks
@@ -36,6 +36,7 @@ import ShuffleScreen from './components/ShuffleScreen';
 import SelectionScreen from './components/SelectionScreen';
 import RevealScreen from './components/RevealScreen';
 import ReadingScreen from './components/ReadingScreen';
+import BottomNav from './components/BottomNav';
 
 const App: React.FC = () => {
   const { isAuthModalOpen, setIsAuthModalOpen, isShareModalOpen, setIsShareModalOpen, activeNotice, setActiveNotice, isMenuOpen, setIsMenuOpen, viewingCard, setViewingCard, activeTooltipId, setActiveTooltipId, isRetryModalOpen, setIsRetryModalOpen, showSplash, setShowSplash, spreadError, setSpreadError } = useUIState();
@@ -47,7 +48,7 @@ const App: React.FC = () => {
   const { readingResult, setReadingResult, isLoading, readingSections, currentPage, setCurrentPage, getReading } = useTarotReading(question, selectedCards, selectedMbti, selectedSpread.name, userProfile?.nickname, setStep, setHistory);
   const { isCopied, shareToKakao, performShare } = useShareManager(readingResult, question, selectedSpread, selectedMbti, selectedCards);
   const { selectedPost, setSelectedPost, isPostEditorOpen, setIsPostEditorOpen, editingPost, setEditingPost, boardRefreshKey, setBoardRefreshKey } = useCommunityManager();
-  
+
   useAppInitialization(setShowSplash);
   const readingRef = useRef<HTMLDivElement>(null);
   const moonData = getMoonData();
@@ -92,9 +93,9 @@ const App: React.FC = () => {
         {step === AppStep.REVEAL && <RevealScreen selectedSpread={selectedSpread} selectedCards={selectedCards} setViewingCard={setViewingCard} getReading={getReading} />}
         {step === AppStep.READING && <ReadingScreen isLoading={isLoading} selectedCards={selectedCards} setViewingCard={setViewingCard} moonData={moonData} selectedMbti={selectedMbti} readingSections={readingSections} currentPage={currentPage} setCurrentPage={setCurrentPage} isHistoryMode={isHistoryMode} selectedSpread={selectedSpread} question={question} readingRef={readingRef} shareToKakao={shareToKakao} performShare={performShare} openHistory={() => setStep(AppStep.HISTORY)} handleResetClick={resetApp} GoogleAd={GoogleAd} />}
         {step === AppStep.MYPAGE && userProfile && <MyPage userProfile={userProfile} onBack={() => setStep(AppStep.INTRO)} />}
-        {step === AppStep.COMMUNITY && <div className="w-full max-w-4xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">커뮤니티</h2><button onClick={() => supabase.auth.signOut()} className="flex items-center gap-2 px-3 py-1.5 bg-red-900/40 text-red-400 rounded-lg hover:bg-red-900/60 transition-colors border border-red-800/50"><LogOut className="w-4 h-4" /><span className="text-xs font-bold">로그아웃</span></button></div><BoardList key={boardRefreshKey} onPostClick={setSelectedPost} onWriteClick={() => currentUser ? setIsPostEditorOpen(true) : setIsAuthModalOpen(true)} /></div>}
-        {step === AppStep.MBTI_ABOUT && <div className="w-full max-w-4xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">MBTI 가이드</h2></div><MbtiAbout /></div>}
-        {step === AppStep.TAROT_ABOUT && <div className="w-full max-w-5xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">타로 가이드</h2></div><TarotAbout /></div>}
+        {step === AppStep.COMMUNITY && <div className="w-full max-w-4xl mx-auto pb-32"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">커뮤니티</h2><button onClick={() => supabase.auth.signOut()} className="flex items-center gap-2 px-3 py-1.5 bg-red-900/40 text-red-400 rounded-lg hover:bg-red-900/60 transition-colors border border-red-800/50"><LogOut className="w-4 h-4" /><span className="text-xs font-bold">로그아웃</span></button></div><BoardList key={boardRefreshKey} onPostClick={setSelectedPost} onWriteClick={() => currentUser ? setIsPostEditorOpen(true) : setIsAuthModalOpen(true)} /></div>}
+        {step === AppStep.MBTI_ABOUT && <div className="w-full max-w-4xl mx-auto pb-32"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">MBTI 가이드</h2></div><MbtiAbout /></div>}
+        {step === AppStep.TAROT_ABOUT && <div className="w-full max-w-5xl mx-auto pb-32"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">타로 가이드</h2></div><TarotAbout /></div>}
       </main>
 
       {viewingCard && (
@@ -102,7 +103,7 @@ const App: React.FC = () => {
           <div className="relative w-full max-w-md bg-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-700" onClick={e => e.stopPropagation()}>
             <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900"><div><h3 className="text-xl font-serif font-bold text-slate-200">{viewingCard.nameKo.split('(')[0].trim()}</h3><p className="text-xs text-slate-400 font-serif">{viewingCard.name}</p></div><button onClick={() => setViewingCard(null)} className="p-2 hover:bg-slate-700 rounded-full"><X className="w-5 h-5 text-slate-400" /></button></div>
             <div className="overflow-y-auto p-6 space-y-6 custom-scrollbar bg-slate-800"><div className="w-full flex justify-center"><div className="w-48 h-80 rounded-lg shadow-lg overflow-hidden border border-slate-600 relative bg-slate-900"><img src={`/image/${String(viewingCard.id).padStart(2, '0')}.jpg`} alt={viewingCard.name} className="w-full h-full object-fill" /></div></div>
-            <div className="space-y-4"><div className="bg-emerald-900/30 p-4 rounded-xl border border-emerald-800"><h4 className="text-emerald-400 font-bold mb-1 flex items-center gap-2">정방향</h4><p className="text-slate-300 text-sm">{viewingCard.meaningUp}</p></div><div className="bg-rose-900/30 p-4 rounded-xl border border-rose-800"><h4 className="text-rose-400 font-bold mb-1 flex items-center gap-2">역방향</h4><p className="text-slate-300 text-sm">{viewingCard.meaningRev}</p></div></div></div>
+              <div className="space-y-4"><div className="bg-emerald-900/30 p-4 rounded-xl border border-emerald-800"><h4 className="text-emerald-400 font-bold mb-1 flex items-center gap-2">정방향</h4><p className="text-slate-300 text-sm">{viewingCard.meaningUp}</p></div><div className="bg-rose-900/30 p-4 rounded-xl border border-rose-800"><h4 className="text-rose-400 font-bold mb-1 flex items-center gap-2">역방향</h4><p className="text-slate-300 text-sm">{viewingCard.meaningRev}</p></div></div></div>
           </div>
         </div>
       )}
@@ -123,11 +124,21 @@ const App: React.FC = () => {
         {selectedPost && <PostDetail post={selectedPost} isOpen={!!selectedPost} onClose={() => setSelectedPost(null)} onEdit={(post) => { setEditingPost(post); setIsPostEditorOpen(true); setSelectedPost(null); }} onDeleteSuccess={() => setBoardRefreshKey(prev => prev + 1)} currentUser={currentUser} userProfile={userProfile} />}
       </Suspense>
 
-      <footer className="w-full py-4 text-center z-20 mt-auto flex flex-col items-center gap-1.5">
-        <div className="flex flex-wrap justify-center gap-2 max-w-2xl px-4 text-[9px] text-slate-500 mb-2">{MBTI_TYPES.map(type => <a key={type} href="#mbti" className="hover:text-indigo-400 transition-colors">{type} 운세</a>)}</div>
-        <div className="flex justify-center gap-4 text-white text-[10px] md:text-xs opacity-60"><a href="/terms" onClick={(e) => { e.preventDefault(); setActiveNotice('tos'); }} className="hover:opacity-100 transition-opacity">이용약관</a><span className="opacity-30">|</span><a href="/privacy" onClick={(e) => { e.preventDefault(); setActiveNotice('privacy'); }} className="hover:opacity-100 transition-opacity">개인정보 처리방침</a></div>
-        <p className="text-white text-[9px] md:text-[11px] opacity-40">MBTI 타로운세 2025 / Powered by ⓒHongLabAI</p>
+      <footer className="w-full py-8 text-center z-20 mt-auto flex flex-col items-center gap-1.5 pb-28">
+        <div className="flex flex-wrap justify-center gap-2 max-w-2xl px-4 text-[9px] text-slate-500 mb-2">{MBTI_TYPES.map(type => <a key={type} href="#mbti" className="hover:text-indigo-400 transition-colors uppercase">{type} 운세</a>)}</div>
+        <div className="flex justify-center gap-4 text-white text-[10px] md:text-xs opacity-60">
+          <button onClick={() => setActiveNotice('tos')} className="hover:opacity-100 transition-opacity">이용약관</button>
+          <span className="opacity-30">|</span>
+          <button onClick={() => setActiveNotice('privacy')} className="hover:opacity-100 transition-opacity">개인정보 처리방침</button>
+        </div>
+        <p className="text-white text-[9px] md:text-[11px] opacity-40">MBTI 타로운세 2026 / Powered by ⓒHongLabAI</p>
       </footer>
+
+      <BottomNav
+        currentStep={step}
+        onStepChange={(newStep) => setStep(newStep)}
+      />
+
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }

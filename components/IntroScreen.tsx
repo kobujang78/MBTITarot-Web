@@ -60,7 +60,7 @@ const IntroScreen: React.FC<IntroScreenProps> = ({
   }, [setSelectedMbti, selectedMbti]);
 
   return (
-    <div className="flex flex-col items-center text-center space-y-4 animate-fadeIn max-w-6xl px-2 relative w-full pt-1">
+    <div className="flex flex-col items-center text-center space-y-4 animate-fadeIn max-w-6xl px-2 relative w-full pt-1 pb-32">
       <nav className="absolute top-0 left-0 right-0 flex justify-between items-center px-4 py-3 z-30 bg-gradient-to-b from-slate-900/90 to-transparent">
         <div className="flex items-center gap-4">
           <button onClick={() => alert("앱 출시 준비 중입니다!")} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-900 rounded-full text-[13px] font-bold shadow-lg hover:bg-white transition-all transform hover:scale-105">
@@ -135,7 +135,7 @@ const IntroScreen: React.FC<IntroScreenProps> = ({
               setSpreadError(null);
               setSelectedSpread(spread);
             }}
-            className={`px-1 py-1.5 rounded-lg border transition-all duration-300 flex flex-col items-center justify-center gap-0.5 ${selectedSpread.id === spread.id ? 'bg-slate-100 text-slate-900 border-white shadow-[0_0_15px_rgba(255,255,255,0.15)] transform scale-105' : 'bg-slate-900/60 text-slate-400 border-slate-800 hover:border-slate-600 hover:text-slate-200'} ${!userProfile && spread.id !== 'TODAY' ? 'opacity-60 grayscale-[0.5]' : ''}`}>
+              className={`px-1 py-1.5 rounded-lg border transition-all duration-300 flex flex-col items-center justify-center gap-0.5 ${selectedSpread.id === spread.id ? 'bg-slate-100 text-slate-900 border-white shadow-[0_0_15px_rgba(255,255,255,0.15)] transform scale-105' : 'bg-slate-900/60 text-slate-400 border-slate-800 hover:border-slate-600 hover:text-slate-200'} ${!userProfile && spread.id !== 'TODAY' ? 'opacity-60 grayscale-[0.5]' : ''}`}>
               <div className="flex items-center gap-1">
                 <span className="text-[13px] font-bold">{spread.name}</span>
                 {!userProfile && spread.id !== 'TODAY' && <Lock className="w-2.5 h-2.5 opacity-50" />}
