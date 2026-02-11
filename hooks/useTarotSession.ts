@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { AppStep, SelectedCard, TarotCard, TarotSpread } from '../types';
 import { TAROT_SPREADS, ALL_CARDS } from '../constants';
 import { deductCrystal, getUserProfile } from '../services/userService';
@@ -12,6 +12,13 @@ export const useTarotSession = (currentUser: any, userProfile: any, setUserProfi
   const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([]);
   const [isQuestionFeeDeducted, setIsQuestionFeeDeducted] = useState(false);
   const isProcessingRef = useRef(false);
+
+  // Sync selectedMbti with user profile when logged in
+  useEffect(() => {
+    if (userProfile?.mbti) {
+      setSelectedMbti(userProfile.mbti);
+    }
+  }, [userProfile]);
 
   const finalizeShuffle = useCallback(() => {
     const shuffled = [...ALL_CARDS].sort(() => Math.random() - 0.5);
