@@ -11,22 +11,27 @@ export const getTarotReading = async (
 ): Promise<string> => {
   try {
     const moonData = getMoonData();
+    // Use FREE key first, then PAID key
     const apiKeys = [
       import.meta.env.VITE_GEMINI_API_KEY_FREE,
-      import.meta.env.VITE_GEMINI_API_KEY_PAID,
-      import.meta.env.VITE_GEMINI_API_KEY
-    ].filter(k => k && !k.includes('PLACEHOLDER'));
+      import.meta.env.VITE_GEMINI_API_KEY_PAID
+    ].filter(k => k && k.startsWith('AIza') && !k.includes('YOUR_'));
 
     const userTitle = nickname ? `${nickname}님` : "당신";
 
     if (apiKeys.length === 0) {
+      console.warn("No valid Gemini API keys found. Using Mock Reading.");
       return getMockReading(question, cards, mbti, moonData, readingTypeName, nickname);
     }
 
     let lastError: any = null;
 
-    for (const apiKey of apiKeys) {
+    for (let i = 0; i < apiKeys.length; i++) {
+      const apiKey = apiKeys[i];
+      const keyType = i === 0 ? "FREE" : "PAID";
+
       try {
+        console.log(`Attempting tarot reading with ${keyType} key...`);
         const ai = new GoogleGenAI({ apiKey: apiKey });
 
         // 1. 운세별 특화 페르소나 및 지침 (관점 고정)
@@ -122,17 +127,18 @@ export const getTarotReading = async (
         });
 
         if (response.text) {
+          console.log(`${keyType} key reading successful.`);
           return response.text;
         }
       } catch (error: any) {
-        console.error(`Gemini API Key (${apiKey.substring(0, 5)}...) Failed:`, error);
+        console.error(`${keyType} key failed:`, error.message || error);
         lastError = error;
         continue;
       }
     }
     throw lastError;
   } catch (error) {
-    console.error("Critical Gemini Service Error:", error);
+    console.error("Critical Gemini Service Error or all keys failed. Falling back to trial mode:", error);
     return getMockReading(question, cards, mbti, getMoonData(), readingTypeName, nickname);
   }
 };
