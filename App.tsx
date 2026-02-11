@@ -53,6 +53,14 @@ const App: React.FC = () => {
   const readingRef = useRef<HTMLDivElement>(null);
   const moonData = getMoonData();
 
+  // Auto-redirect to MyPage after login if the user was trying to access it
+  React.useEffect(() => {
+    if (currentUser && isAuthModalOpen) {
+      setIsAuthModalOpen(false);
+      setStep(AppStep.MYPAGE);
+    }
+  }, [currentUser, isAuthModalOpen]);
+
   const renderUserBadge = () => userProfile && (
     <div className="flex items-center gap-2 bg-slate-900/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/5 shadow-lg">
       <div className="flex items-center gap-1 px-1.5 py-0.5 bg-indigo-500/10 rounded-full border border-indigo-500/20"><span className="text-sm">🔮</span><span className="text-[13px] font-bold text-indigo-200">{userProfile.crystals}개</span></div>
@@ -109,7 +117,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <Suspense fallback={<div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center"><Sparkles className="w-8 h-8 text-slate-400 animate-spin" /></div>}>
+      <Suspense fallback={<div className="fixed bottom-24 right-4 z-50 p-2 bg-slate-900/80 backdrop-blur-md rounded-full border border-white/10 shadow-lg"><Sparkles className="w-5 h-5 text-slate-400 animate-spin" /></div>}>
         <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} onShowNotice={setActiveNotice} />
         {userProfile && <PostEditor isOpen={isPostEditorOpen} onClose={() => { setIsPostEditorOpen(false); setEditingPost(null); }} userProfile={userProfile} editingPost={editingPost} onSuccess={() => setBoardRefreshKey(prev => prev + 1)} />}
         {selectedPost && <PostDetail post={selectedPost} isOpen={!!selectedPost} onClose={() => setSelectedPost(null)} onEdit={(post) => { setEditingPost(post); setIsPostEditorOpen(true); setSelectedPost(null); }} onDeleteSuccess={() => setBoardRefreshKey(prev => prev + 1)} currentUser={currentUser} userProfile={userProfile} />}
@@ -128,6 +136,7 @@ const App: React.FC = () => {
       <BottomNav
         currentStep={step}
         onStepChange={(newStep) => {
+          console.log(`Nav changed to: ${newStep}, User: ${currentUser ? 'LoggedIn' : 'Guest'}`);
           if (newStep === AppStep.MYPAGE && !currentUser) {
             setIsAuthModalOpen(true);
           } else {
