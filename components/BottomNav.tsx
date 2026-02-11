@@ -5,29 +5,26 @@ import { AppStep } from '../types';
 interface BottomNavProps {
     currentStep: AppStep;
     onStepChange: (step: AppStep) => void;
+    isLoggedIn: boolean;
     isAdmin?: boolean;
 }
 
-const BottomNav: React.FC<BottomNavProps> = ({ currentStep, onStepChange }) => {
+const BottomNav: React.FC<BottomNavProps> = ({ currentStep, onStepChange, isLoggedIn }) => {
     const navItems = [
         { id: AppStep.INTRO, label: '홈', icon: Home },
-        { id: 'CONSULT', label: '타로상담', icon: Sparkles }, // Special ID for consultation
+        { id: AppStep.COMMUNITY, label: '타로상담', icon: Sparkles },
         { id: AppStep.HISTORY, label: '운명의 기록', icon: History },
-        { id: AppStep.MYPAGE, label: '마이페이지', icon: User },
+        { id: AppStep.MYPAGE, label: isLoggedIn ? '마이페이지' : '로그인', icon: User },
     ];
 
-    const handleNavClick = (id: string | AppStep) => {
-        if (id === 'CONSULT') {
-            onStepChange(AppStep.INTRO);
-            // Optional: scroll to consultation section if needed
+    const handleNavClick = (id: AppStep) => {
+        onStepChange(id);
+        if (id === AppStep.INTRO) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            onStepChange(id as AppStep);
         }
     };
 
-    const isActive = (id: string | AppStep) => {
-        if (id === 'CONSULT') return currentStep === AppStep.INTRO;
+    const isActive = (id: AppStep) => {
         return currentStep === id;
     };
 

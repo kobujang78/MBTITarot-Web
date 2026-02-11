@@ -136,7 +136,14 @@ const App: React.FC = () => {
 
       <BottomNav
         currentStep={step}
-        onStepChange={(newStep) => setStep(newStep)}
+        onStepChange={(newStep) => {
+          if (newStep === AppStep.MYPAGE && !currentUser) {
+            setIsAuthModalOpen(true);
+          } else {
+            setStep(newStep);
+          }
+        }}
+        isLoggedIn={!!currentUser}
       />
 
       <style>{`

@@ -63,9 +63,6 @@ const IntroScreen: React.FC<IntroScreenProps> = ({
     <div className="flex flex-col items-center text-center space-y-4 animate-fadeIn max-w-6xl px-2 relative w-full pt-1 pb-32">
       <nav className="absolute top-0 left-0 right-0 flex justify-between items-center px-4 py-3 z-30 bg-gradient-to-b from-slate-900/90 to-transparent">
         <div className="flex items-center gap-4">
-          <button onClick={() => alert("앱 출시 준비 중입니다!")} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-900 rounded-full text-[13px] font-bold shadow-lg hover:bg-white transition-all transform hover:scale-105">
-            <Download className="w-4 h-4" /> 앱다운
-          </button>
           <div className="hidden md:flex gap-4 text-xs font-bold text-slate-400">
             <a href="#about" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors">소개</a>
             <button onClick={() => setStep(AppStep.MBTI_ABOUT)} className="hover:text-white transition-colors">MBTI란?</button>
@@ -78,11 +75,6 @@ const IntroScreen: React.FC<IntroScreenProps> = ({
           <button onClick={() => setStep(AppStep.COMMUNITY)} className="md:hidden flex items-center gap-1 text-slate-300 text-xs font-bold">
             <MessageSquare className="w-4 h-4" />
           </button>
-          {userProfile ? renderUserBadge() : (
-            <button onClick={() => setIsAuthModalOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-900 rounded-full text-[13px] font-bold shadow-lg hover:bg-white transition-all transform hover:scale-105">
-              <LogIn className="w-4 h-4" /> 로그인
-            </button>
-          )}
         </div>
       </nav>
 
