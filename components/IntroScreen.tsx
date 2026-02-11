@@ -60,7 +60,7 @@ const IntroScreen: React.FC<IntroScreenProps> = ({
   }, [setSelectedMbti, selectedMbti]);
 
   return (
-    <div className="flex flex-col items-center text-center space-y-4 animate-fadeIn max-w-6xl px-2 relative w-full pt-1 pb-32">
+    <div className="flex flex-col items-center text-center space-y-4 animate-fadeIn max-w-6xl px-2 relative w-full pt-1 pb-24">
       <nav className="absolute top-0 left-0 right-0 flex justify-between items-center px-4 py-3 z-30 bg-gradient-to-b from-slate-900/90 to-transparent">
         <div className="flex items-center gap-4">
           <div className="hidden md:flex gap-4 text-xs font-bold text-slate-400">
