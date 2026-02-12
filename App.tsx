@@ -55,9 +55,14 @@ const App: React.FC = () => {
 
   // Handle incomplete profile for social login users
   React.useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (!isSessionLoading && currentUser && !userProfile && !isAuthModalOpen) {
-      setIsAuthModalOpen(true);
+      // Delay opening modal to allow for profile sync/creation latency
+      timer = setTimeout(() => {
+        setIsAuthModalOpen(true);
+      }, 500);
     }
+    return () => clearTimeout(timer);
   }, [isSessionLoading, currentUser, userProfile, isAuthModalOpen]);
 
   // Auto-redirect to MyPage after login if the user was trying to access it
