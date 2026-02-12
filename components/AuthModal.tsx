@@ -154,9 +154,7 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
             const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: redirectUrl,
-                    skipBrowserRedirect: isCapacitor // For native, we handle the open ourselves if needed, but Supabase SDK usually handles it. 
-                    // Actually, for Capacitor context with Supabase, standard practice is letting the browser open.
+                    redirectTo: redirectUrl
                 }
             });
             if (oauthError) throw oauthError;
