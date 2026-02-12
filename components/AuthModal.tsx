@@ -390,35 +390,49 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                                         {isLogin ? '회원가입하고 혜택받기' : '로그인하러 가기'}
                                     </button>
                                 )}
+                                {socialUser && (
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            await supabase.auth.signOut();
+                                            onClose();
+                                        }}
+                                        className="text-xs font-bold text-slate-500 hover:text-slate-300 underline mt-2"
+                                    >
+                                        다른 계정으로 로그인하기 (로그아웃)
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </form>
-                </div>
-            </div>
+                </div >
+            </div >
 
             {/* MBTI Test Modal */}
-            {showMbtiTest && (
-                <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn p-0 md:p-4">
-                    <div className="relative w-full h-full md:h-[90vh] md:w-[90vw] md:max-w-4xl bg-white md:rounded-2xl overflow-hidden flex flex-col">
-                        <div className="flex items-center justify-between p-3 bg-slate-900 text-white border-b border-white/10 shrink-0">
-                            <h3 className="font-bold flex items-center gap-2">
-                                <span className="text-xl">🔮</span> MBTI 간편 테스트
-                            </h3>
-                            <button
-                                onClick={() => setShowMbtiTest(false)}
-                                className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
+            {
+                showMbtiTest && (
+                    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fadeIn p-0 md:p-4">
+                        <div className="relative w-full h-full md:h-[90vh] md:w-[90vw] md:max-w-4xl bg-white md:rounded-2xl overflow-hidden flex flex-col">
+                            <div className="flex items-center justify-between p-3 bg-slate-900 text-white border-b border-white/10 shrink-0">
+                                <h3 className="font-bold flex items-center gap-2">
+                                    <span className="text-xl">🔮</span> MBTI 간편 테스트
+                                </h3>
+                                <button
+                                    onClick={() => setShowMbtiTest(false)}
+                                    className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <iframe
+                                src="/mbtitest/mbtitest.html"
+                                className="w-full flex-1 border-0"
+                                title="MBTI Test"
+                            />
                         </div>
-                        <iframe
-                            src="/mbtitest/mbtitest.html"
-                            className="w-full flex-1 border-0"
-                            title="MBTI Test"
-                        />
                     </div>
-                </div>
-            )}
+                )
+            }
         </>
     );
 });

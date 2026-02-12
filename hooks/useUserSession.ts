@@ -8,9 +8,11 @@ export const useUserSession = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const hasCountedVisit = useRef(false);
 
+  const [isSessionLoading, setIsSessionLoading] = useState(true);
+
   useEffect(() => {
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const user = session?.user;
+      const user = session?.user ?? null;
       setCurrentUser(user);
 
       if (user) {
@@ -24,6 +26,7 @@ export const useUserSession = () => {
             await supabase.auth.signOut();
             localStorage.removeItem('sessionLoginTime');
             alert("보안을 위해 세션이 만료되어 로그아웃되었습니다.");
+            setIsSessionLoading(false);
             return;
           }
         } else if (!loginTimeStr) {
@@ -63,12 +66,15 @@ export const useUserSession = () => {
           })
           .subscribe();
 
+        setIsSessionLoading(false);
+
         return () => {
           profileSubscription.unsubscribe();
         };
       } else {
         localStorage.removeItem('sessionLoginTime');
         setUserProfile(null);
+        setIsSessionLoading(false);
       }
     });
 
@@ -101,5 +107,5 @@ export const useUserSession = () => {
     return () => clearInterval(interval);
   }, [currentUser]);
 
-  return { currentUser, userProfile, setUserProfile };
+  return { currentUser, userProfile, setUserProfile, isSessionLoading };
 };

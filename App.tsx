@@ -41,7 +41,7 @@ import BottomNav from './components/BottomNav';
 const App: React.FC = () => {
   const { isAuthModalOpen, setIsAuthModalOpen, isShareModalOpen, setIsShareModalOpen, activeNotice, setActiveNotice, isMenuOpen, setIsMenuOpen, viewingCard, setViewingCard, activeTooltipId, setActiveTooltipId, isRetryModalOpen, setIsRetryModalOpen, showSplash, setShowSplash, spreadError, setSpreadError } = useUIState();
   const { triggerFlipSound, triggerRotateSound } = useAudioEffects();
-  const { currentUser, userProfile, setUserProfile } = useUserSession();
+  const { currentUser, userProfile, setUserProfile, isSessionLoading } = useUserSession();
   const { step, setStep, question, setQuestion, selectedMbti, setSelectedMbti, selectedSpread, setSelectedSpread, deck, setDeck, selectedCards, setSelectedCards, startShuffling, handleCardSelect, resetApp } = useTarotSession(currentUser, userProfile, setUserProfile, setIsAuthModalOpen, triggerFlipSound);
   const [isHistoryMode, setIsHistoryMode] = React.useState(false);
   const { history, setHistory, historySort, setHistorySort, historySearch, setHistorySearch, expandedHistoryId, setExpandedHistoryId, filteredHistory, loadHistoryItem, deleteHistoryItem } = useHistoryManager(setStep, setQuestion, setSelectedMbti, setSelectedCards, (r) => { }, (m) => setIsHistoryMode(m));
@@ -52,6 +52,13 @@ const App: React.FC = () => {
   useAppInitialization(setShowSplash);
   const readingRef = useRef<HTMLDivElement>(null);
   const moonData = getMoonData();
+
+  // Handle incomplete profile for social login users
+  React.useEffect(() => {
+    if (!isSessionLoading && currentUser && !userProfile && !isAuthModalOpen) {
+      setIsAuthModalOpen(true);
+    }
+  }, [isSessionLoading, currentUser, userProfile, isAuthModalOpen]);
 
   // Auto-redirect to MyPage after login if the user was trying to access it
   React.useEffect(() => {
@@ -92,7 +99,7 @@ const App: React.FC = () => {
         {step === AppStep.REVEAL && <RevealScreen selectedSpread={selectedSpread} selectedCards={selectedCards} setViewingCard={setViewingCard} getReading={getReading} />}
         {step === AppStep.READING && <ReadingScreen isLoading={isLoading} selectedCards={selectedCards} setViewingCard={setViewingCard} moonData={moonData} selectedMbti={selectedMbti} readingSections={readingSections} currentPage={currentPage} setCurrentPage={setCurrentPage} isHistoryMode={isHistoryMode} selectedSpread={selectedSpread} question={question} readingRef={readingRef} shareToKakao={shareToKakao} performShare={performShare} openHistory={() => setStep(AppStep.HISTORY)} handleResetClick={resetApp} GoogleAd={GoogleAd} />}
         {step === AppStep.MYPAGE && (userProfile ? <MyPage userProfile={userProfile} onBack={() => setStep(AppStep.INTRO)} /> : <div className="fixed inset-0 flex items-center justify-center text-white/50 z-20">프로필을 불러오는 중입니다...</div>)}
-        {step === AppStep.COMMUNITY && <div className="w-full max-w-4xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">커뮤니티</h2><button onClick={() => supabase.auth.signOut()} className="flex items-center gap-2 px-3 py-1.5 bg-red-900/40 text-red-400 rounded-lg hover:bg-red-900/60 transition-colors border border-red-800/50"><LogOut className="w-4 h-4" /><span className="text-xs font-bold">로그아웃</span></button></div><BoardList key={boardRefreshKey} onPostClick={setSelectedPost} onWriteClick={() => currentUser ? setIsPostEditorOpen(true) : setIsAuthModalOpen(true)} /></div>}
+        {step === AppStep.COMMUNITY && <div className="w-full max-w-4xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">커뮤니티</h2></div><BoardList key={boardRefreshKey} onPostClick={setSelectedPost} onWriteClick={() => currentUser ? setIsPostEditorOpen(true) : setIsAuthModalOpen(true)} /></div>}
         {step === AppStep.MBTI_ABOUT && <div className="w-full max-w-4xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">MBTI 가이드</h2></div><MbtiAbout /></div>}
         {step === AppStep.TAROT_ABOUT && <div className="w-full max-w-5xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">타로 가이드</h2></div><TarotAbout /></div>}
       </main>
