@@ -5,6 +5,7 @@ import Button from './Button';
 import { supabase } from '../services/supabase';
 import { MBTI_TYPES } from '../constants';
 import { checkNicknameExists, updateUserProfile } from '../services/userService';
+import { MBTI_TAROT_STYLES } from './LandingContent';
 
 interface MyPageProps {
     userProfile: UserProfile;
@@ -172,7 +173,6 @@ const MyPage: React.FC<MyPageProps> = React.memo(({ userProfile, onBack }) => {
                         <div className="text-center w-full max-w-xs">
                             {isEditing ? (
                                 <div className="space-y-3 mt-2 animate-fadeIn">
-                                    {/* Nickname Input */}
                                     <div className="relative">
                                         <input
                                             type="text"
@@ -189,7 +189,6 @@ const MyPage: React.FC<MyPageProps> = React.memo(({ userProfile, onBack }) => {
                                         )}
                                     </div>
 
-                                    {/* MBTI Select */}
                                     <div className="flex justify-center">
                                         <div className="grid grid-cols-4 gap-1 w-full p-2 bg-slate-800/50 rounded-lg border border-slate-700/50 max-h-[120px] overflow-y-auto custom-scrollbar">
                                             {MBTI_TYPES.filter(t => t !== '공통').map((type) => (
@@ -230,50 +229,112 @@ const MyPage: React.FC<MyPageProps> = React.memo(({ userProfile, onBack }) => {
                     </div>
                 </div>
 
-                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {/* Stats */}
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-base shadow-inner">
-                                🔮
-                            </div>
+                {/* Enhanced Crystal & Stats Bar */}
+                <div className="px-4 py-5 bg-indigo-600/10 border-b border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-2xl shadow-lg border border-indigo-500/30 animate-pulse">
+                            🔮
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">나의 에너지</p>
+                            <p className="text-xl font-black text-white flex items-center gap-1.5">
+                                {userProfile.crystals}<span className="text-xs font-bold text-slate-400">수정구슬</span>
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => alert("매일 첫 로그인 시 5개의 수정구슬이 충전됩니다!")}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[11px] font-bold transition-all shadow-lg active:scale-95"
+                    >
+                        구슬 충전하기
+                    </button>
+                </div>
+
+                {/* MBTI Personality Card */}
+                {userProfile.mbti && MBTI_TAROT_STYLES[userProfile.mbti] && (
+                    <div className="p-5 bg-slate-800/20 border-b border-white/5">
+                        <div className="flex items-center gap-3 mb-4">
+                            <span className="text-3xl p-2 bg-slate-800 rounded-2xl border border-white/5 shadow-inner">
+                                {MBTI_TAROT_STYLES[userProfile.mbti].icon}
+                            </span>
                             <div>
-                                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">보유 수정구슬</p>
-                                <p className="text-[13px] font-bold text-slate-200">{userProfile.crystals}개</p>
+                                <h3 className="text-[13px] font-black text-slate-200 uppercase tracking-wider">
+                                    {userProfile.mbti} : {MBTI_TAROT_STYLES[userProfile.mbti].title}
+                                </h3>
+                                <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">Personal Oracle Profile</p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500">
-                                <Eye className="w-4 h-4" />
+                        <div className="space-y-4">
+                            <div className="bg-slate-900/40 p-3 rounded-2xl border border-white/5">
+                                <h4 className="text-[10px] font-bold text-indigo-300 mb-1 flex items-center gap-1.5 uppercase">
+                                    <Sparkles className="w-3 h-3" /> 당신만의 타로 스타일
+                                </h4>
+                                <p className="text-[12px] leading-relaxed text-slate-400 font-medium">
+                                    {MBTI_TAROT_STYLES[userProfile.mbti].summary}
+                                </p>
                             </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">총 방문 횟수</p>
-                                <p className="text-[13px] font-bold text-slate-200">{userProfile.totalCount || 0}회</p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <h4 className="text-[10px] font-bold text-slate-500 mb-1 uppercase pl-1">상담을 대하는 태도</h4>
+                                    <p className="text-[11px] text-slate-500 leading-relaxed pl-1">
+                                        {MBTI_TAROT_STYLES[userProfile.mbti].attitude}
+                                    </p>
+                                </div>
+                                <div className="bg-indigo-900/10 p-3 rounded-xl border border-indigo-500/10">
+                                    <h4 className="text-[10px] font-bold text-indigo-400 mb-1 uppercase">추천 질문 예시</h4>
+                                    <p className="text-[11px] text-indigo-200/80 italic font-medium leading-relaxed">
+                                        "{MBTI_TAROT_STYLES[userProfile.mbti].question.split('/')[0].trim()}"
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
+                )}
 
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500">
-                                <Calendar className="w-4 h-4" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">가입일</p>
-                                <p className="text-[13px] font-bold text-slate-200">{joinDate}</p>
-                            </div>
+                <div className="p-4 grid grid-cols-2 gap-3 bg-slate-900/20">
+                    <div className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-2xl border border-white/5">
+                        <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500">
+                            <Eye className="w-4 h-4" />
                         </div>
+                        <div>
+                            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-tighter">총 방문</p>
+                            <p className="text-[12px] font-bold text-slate-200">{userProfile.totalCount || 0}회</p>
+                        </div>
+                    </div>
 
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500">
-                                <Star className="w-4 h-4" />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">이메일</p>
-                                <p className="text-[13px] font-bold text-slate-300 truncate max-w-[150px]">{userProfile.email}</p>
-                            </div>
+                    <div className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-2xl border border-white/5">
+                        <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500">
+                            <Calendar className="w-4 h-4" />
                         </div>
+                        <div>
+                            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-tighter">가입일</p>
+                            <p className="text-[11px] font-bold text-slate-200 whitespace-nowrap">{joinDate}</p>
+                        </div>
+                    </div>
+
+                    <div className="col-span-2 flex items-center gap-3 p-3 bg-slate-800/30 rounded-2xl border border-white/5">
+                        <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-500">
+                            <Star className="w-4 h-4" />
+                        </div>
+                        <div className="overflow-hidden">
+                            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-tighter">계정 정보</p>
+                            <p className="text-[12px] font-bold text-slate-300 truncate">{userProfile.email}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Benefit Info Section */}
+            <div className="mb-6 grid grid-cols-1 gap-2">
+                <div className="p-4 bg-gradient-to-br from-indigo-900/20 to-slate-900/40 border border-indigo-500/20 rounded-3xl flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 flex items-center justify-center shrink-0">
+                        <Sparkles className="w-5 h-5 text-indigo-400" />
+                    </div>
+                    <div>
+                        <h4 className="text-[12px] font-bold text-slate-200">매일매일 충전되는 기운!</h4>
+                        <p className="text-[11px] text-slate-500">최초 로그인 시 구슬 5개가 지급됩니다.</p>
                     </div>
                 </div>
             </div>

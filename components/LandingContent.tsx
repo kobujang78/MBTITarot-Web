@@ -10,7 +10,7 @@ interface MbtiContent {
 }
 
 /* New MBTI Data Ordered by Group (Analysts, Diplomats, Sentinels, Explorers) */
-const MBTI_TAROT_STYLES: Record<string, MbtiContent> = {
+export const MBTI_TAROT_STYLES: Record<string, MbtiContent> = {
     // 분석가형 (Analysts)
     INTJ: {
         title: "용의주도한 전략가", icon: "♟️",

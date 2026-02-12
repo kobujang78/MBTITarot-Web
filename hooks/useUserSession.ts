@@ -53,7 +53,7 @@ export const useUserSession = () => {
         const profileSubscription = supabase
           .channel(`profile:${user.id}`)
           .on('postgres_changes', {
-            event: 'UPDATE',
+            event: '*',
             schema: 'public',
             table: 'profiles',
             filter: `id=eq.${user.id}`
