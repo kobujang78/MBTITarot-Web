@@ -17,16 +17,23 @@ export const useUserSession = () => {
    * Signs out the user and cleans up the session state.
    */
   const handleForcedLogout = useCallback(async () => {
+    // Only act if there is a current user to log out
+    if (!currentUser) return;
+
     try {
-      await supabase.auth.signOut();
-      setCurrentUser(null);
-      setUserProfile(null);
-      sessionStorage.removeItem('sessionLoginTime');
-      console.log("Session cleared due to app backgrounding or closure.");
+      // Double check session before signing out
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase.auth.signOut();
+        setCurrentUser(null);
+        setUserProfile(null);
+        sessionStorage.removeItem('sessionLoginTime');
+        console.log("Session cleared due to app backgrounding or closure.");
+      }
     } catch (e) {
       console.error("Forced logout failed:", e);
     }
-  }, []);
+  }, [currentUser]);
 
   /**
    * Loads the user profile, retrying once if the first attempt fails.
