@@ -81,7 +81,7 @@ const IntroScreen: React.FC<IntroScreenProps> = ({
       <div className={`w-full max-w-lg flex flex-col items-center justify-center transition-all ${userProfile ? 'min-h-[70px] mt-12 md:mt-16 mb-0' : 'min-h-[120px] mt-12 md:mt-16'}`}>
         {userProfile ? (
           <div className="flex flex-col items-center animate-fadeIn py-1">
-            <label className="block text-white text-sm md:text-base mb-2 font-medium">시스템이 분석한 당신의 성향</label>
+            <label className="block text-white text-sm md:text-base mb-2 font-medium">당신의 MBTI성향</label>
             <div className="relative group">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-500/20 to-indigo-500/20 rounded-full blur opacity-75 transition duration-1000"></div>
               <div className="relative px-5 py-1 bg-slate-900/40 backdrop-blur-sm border border-white/10 rounded-full shadow-lg">
