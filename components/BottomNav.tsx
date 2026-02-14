@@ -1,5 +1,4 @@
-import React from 'react';
-import { Home, Sparkles, History, User } from 'lucide-react';
+import { Home, Compass, Sparkles, History, User } from 'lucide-react';
 import { AppStep } from '../types';
 
 interface BottomNavProps {
@@ -12,6 +11,7 @@ interface BottomNavProps {
 const BottomNav: React.FC<BottomNavProps> = ({ currentStep, onStepChange, isLoggedIn }) => {
     const navItems = [
         { id: AppStep.INTRO, label: '홈', icon: Home },
+        { id: AppStep.SQUARE, label: '타로광장', icon: Compass },
         { id: AppStep.COMMUNITY, label: '타로상담', icon: Sparkles },
         { id: AppStep.HISTORY, label: '운명의 기록', icon: History },
         { id: AppStep.MYPAGE, label: isLoggedIn ? '마이페이지' : '로그인', icon: User },

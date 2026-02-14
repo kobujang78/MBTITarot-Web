@@ -20,13 +20,12 @@ interface IntroScreenProps {
   setSpreadError: (err: string | null) => void;
   renderUserBadge: () => React.ReactNode;
   GoogleAd: React.FC<{ type?: 'inline' | 'side' }>;
-  LandingContent: React.ComponentType;
 }
 
 const IntroScreen: React.FC<IntroScreenProps> = ({
   userProfile, selectedMbti, setSelectedMbti, selectedSpread, setSelectedSpread,
   question, setQuestion, setStep, setIsAuthModalOpen, startShuffling, openHistory,
-  spreadError, setSpreadError, renderUserBadge, GoogleAd, LandingContent
+  spreadError, setSpreadError, renderUserBadge, GoogleAd
 }) => {
   const wheelRef = useRef<HTMLDivElement>(null);
 
@@ -160,7 +159,6 @@ const IntroScreen: React.FC<IntroScreenProps> = ({
         </div>
         <GoogleAd type="side" />
       </div>
-      <div id="about"><LandingContent /></div>
       <div className="pb-4"></div>
     </div>
   );

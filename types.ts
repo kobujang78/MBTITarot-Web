@@ -38,6 +38,7 @@ export enum AppStep {
   MYPAGE = 'MYPAGE',
   MBTI_ABOUT = 'MBTI_ABOUT',
   TAROT_ABOUT = 'TAROT_ABOUT',
+  SQUARE = 'SQUARE',
 }
 
 export interface ReadingResponse {
