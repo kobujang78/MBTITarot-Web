@@ -12,36 +12,42 @@ export const useUserSession = () => {
   const [isSessionLoading, setIsSessionLoading] = useState(true);
   const hasCountedVisit = useRef(false);
   const profileSubRef = useRef<any>(null);
+  const isMountedRef = useRef(true);
+
+  // Keep currentUser in a ref for use in event listeners without dependency issues
+  const currentUserRef = useRef<any>(null);
+  useEffect(() => {
+    currentUserRef.current = currentUser;
+  }, [currentUser]);
 
   /**
    * Signs out the user and cleans up the session state.
    */
   const handleForcedLogout = useCallback(async () => {
     // Only act if there is a current user to log out
-    if (!currentUser) return;
+    if (!currentUserRef.current) return;
 
     try {
-      // Double check session before signing out
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        await supabase.auth.signOut();
+      console.log("Forcing logout due to app backgrounding or closure...");
+      await supabase.auth.signOut();
+      if (isMountedRef.current) {
         setCurrentUser(null);
         setUserProfile(null);
-        sessionStorage.removeItem('sessionLoginTime');
-        console.log("Session cleared due to app backgrounding or closure.");
       }
     } catch (e) {
       console.error("Forced logout failed:", e);
     }
-  }, [currentUser]);
+  }, []);
 
   /**
    * Loads the user profile, retrying once if the first attempt fails.
    */
-  const loadUserProfile = useCallback(async (user: any): Promise<UserProfile | null> => {
+  const loadProfile = useCallback(async (user: any) => {
+    if (!user) return null;
     try {
       let profile = await getUserProfile(user.id);
 
+      // Auto-register if user metadata exists but profile doesn't
       if (!profile && user.user_metadata?.nickname) {
         try {
           const { nickname, mbti, referrer } = user.user_metadata;
@@ -51,24 +57,16 @@ export const useUserSession = () => {
           console.error("Auto-registration failed:", e);
         }
       }
-
       return profile;
-    } catch (error) {
-      console.error("Failed to load user profile:", error);
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return await getUserProfile(user.id);
-      } catch (retryError) {
-        console.error("Profile load retry also failed:", retryError);
-        return null;
-      }
+    } catch (e) {
+      console.error("Profile load error:", e);
+      return null;
     }
   }, []);
 
-  const subscribeToProfileChanges = useCallback((userId: string) => {
+  const subscribeToProfile = useCallback((userId: string) => {
     if (profileSubRef.current) {
       profileSubRef.current.unsubscribe();
-      profileSubRef.current = null;
     }
 
     profileSubRef.current = supabase
@@ -79,134 +77,107 @@ export const useUserSession = () => {
         table: 'profiles',
         filter: `id=eq.${userId}`
       }, async () => {
-        try {
-          const updatedProfile = await getUserProfile(userId);
-          if (updatedProfile) setUserProfile(updatedProfile);
-        } catch (e) {
-          console.error("Realtime profile update failed:", e);
-        }
+        const updated = await getUserProfile(userId);
+        if (isMountedRef.current && updated) setUserProfile(updated);
       })
       .subscribe();
   }, []);
 
-  // ─── Main Session Logic ──────────────────────────────────────
   useEffect(() => {
-    let isMounted = true;
+    isMountedRef.current = true;
 
-    // Handler for app backgrounding (Capacitor)
+    // 1. App State & Visibility Listeners for auto-logout
     const appStateListener = App.addListener('appStateChange', ({ isActive }) => {
-      if (!isActive) {
-        console.log("App moved to background. Triggering logout as requested.");
-        handleForcedLogout();
-      }
+      if (!isActive) handleForcedLogout();
     });
 
-    // Handler for browser visibility change (Web)
     const visibilityListener = () => {
-      if (document.visibilityState === 'hidden') {
-        console.log("Tab hidden. Triggering logout.");
-        handleForcedLogout();
-      }
+      if (document.visibilityState === 'hidden') handleForcedLogout();
     };
     document.addEventListener('visibilitychange', visibilityListener);
 
-    const initializeSession = async () => {
+    // 2. Initialize Session
+    const init = async () => {
+      setIsSessionLoading(true);
       try {
         const { data: { session } } = await supabase.auth.getSession();
         const user = session?.user ?? null;
 
-        if (!isMounted) return;
-
-        if (user) {
-          setCurrentUser(user);
-
-          if (!sessionStorage.getItem('sessionLoginTime')) {
-            sessionStorage.setItem('sessionLoginTime', Date.now().toString());
-          }
-
-          const profile = await loadUserProfile(user);
-          if (isMounted && profile) {
-            setUserProfile(profile);
-          }
-
-          handleDailyLoginReward(user.id).catch(e => console.warn(e));
-
-          if (!hasCountedVisit.current) {
-            incrementVisitCount(user.id).catch(e => console.warn(e));
-            hasCountedVisit.current = true;
-          }
-
-          subscribeToProfileChanges(user.id);
-        } else {
-          setCurrentUser(null);
-          setUserProfile(null);
-          sessionStorage.removeItem('sessionLoginTime');
-        }
-      } catch (error) {
-        console.error("Session initialization error:", error);
-      } finally {
-        if (isMounted) setIsSessionLoading(false);
-      }
-    };
-
-    initializeSession();
-
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!isMounted) return;
-        const user = session?.user ?? null;
+        if (!isMountedRef.current) return;
         setCurrentUser(user);
 
-        if (event === 'SIGNED_IN' && user) {
-          sessionStorage.setItem('sessionLoginTime', Date.now().toString());
-          const profile = await loadUserProfile(user);
-          if (isMounted && profile) setUserProfile(profile);
-          handleDailyLoginReward(user.id).catch(e => console.warn(e));
-          if (!hasCountedVisit.current) {
-            incrementVisitCount(user.id).catch(e => console.warn(e));
-            hasCountedVisit.current = true;
+        if (user) {
+          const profile = await loadProfile(user);
+          if (isMountedRef.current) {
+            setUserProfile(profile);
+            if (profile) {
+              handleDailyLoginReward(user.id).catch(() => { });
+              if (!hasCountedVisit.current) {
+                incrementVisitCount(user.id).catch(() => { });
+                hasCountedVisit.current = true;
+              }
+              subscribeToProfile(user.id);
+            }
           }
-          subscribeToProfileChanges(user.id);
-          setIsSessionLoading(false);
-        } else if (event === 'SIGNED_OUT') {
-          setUserProfile(null);
-          sessionStorage.removeItem('sessionLoginTime');
-          hasCountedVisit.current = false;
-          if (profileSubRef.current) {
-            profileSubRef.current.unsubscribe();
-            profileSubRef.current = null;
+        }
+      } catch (e) {
+        console.error("Init session error:", e);
+      } finally {
+        if (isMountedRef.current) setIsSessionLoading(false);
+      }
+    };
+
+    init();
+
+    // 3. Auth Change Listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const user = session?.user ?? null;
+      if (!isMountedRef.current) return;
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setCurrentUser(user);
+        const profile = await loadProfile(user);
+        if (isMountedRef.current) {
+          setUserProfile(profile);
+          if (profile && user) {
+            subscribeToProfile(user.id);
           }
           setIsSessionLoading(false);
         }
+      } else if (event === 'SIGNED_OUT') {
+        setCurrentUser(null);
+        setUserProfile(null);
+        hasCountedVisit.current = false;
+        if (profileSubRef.current) profileSubRef.current.unsubscribe();
+        setIsSessionLoading(false);
+      } else if (event === 'INITIAL_SESSION') {
+        // Handled by init() but good to have as backup
+        if (user && !currentUserRef.current) {
+          setCurrentUser(user);
+          const profile = await loadProfile(user);
+          if (isMountedRef.current) setUserProfile(profile);
+        }
       }
-    );
+    });
 
     return () => {
-      isMounted = false;
-      authSubscription.unsubscribe();
+      isMountedRef.current = false;
       appStateListener.then(l => l.remove());
       document.removeEventListener('visibilitychange', visibilityListener);
-      if (profileSubRef.current) {
-        profileSubRef.current.unsubscribe();
-        profileSubRef.current = null;
-      }
+      subscription.unsubscribe();
+      if (profileSubRef.current) profileSubRef.current.unsubscribe();
     };
-  }, [handleForcedLogout, loadUserProfile, subscribeToProfileChanges]);
+  }, [handleForcedLogout, loadProfile, subscribeToProfile]);
 
-  // ─── Periodic Session Expiry Check ───────────────────────────
-  // ─── Periodic Profile Refresh ────────────────────────────────
+  // Periodic Refresh
   useEffect(() => {
     if (!currentUser) return;
-
     const interval = setInterval(async () => {
       try {
-        const profile = await getUserProfile(currentUser.id);
-        if (profile) setUserProfile(profile);
-      } catch (e) {
-        console.warn("Periodic profile refresh failed:", e);
-      }
+        const p = await getUserProfile(currentUser.id);
+        if (isMountedRef.current && p) setUserProfile(p);
+      } catch { }
     }, PROFILE_POLL_INTERVAL);
-
     return () => clearInterval(interval);
   }, [currentUser]);
 
