@@ -49,9 +49,9 @@ const IntroScreen: React.FC<IntroScreenProps> = ({
     items?.forEach(item => observer.observe(item));
 
     if (!selectedMbti || selectedMbti === '공통') {
-      const istjElement = wheelRef.current?.querySelector('[data-type="ISTJ"]');
-      if (istjElement) {
-        istjElement.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'center' });
+      const commonElement = wheelRef.current?.querySelector('[data-type="공통"]');
+      if (commonElement) {
+        commonElement.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'center' });
       }
     }
 
