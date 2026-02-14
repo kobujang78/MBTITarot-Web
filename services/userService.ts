@@ -124,7 +124,7 @@ export const handleDailyLoginReward = async (uid: string): Promise<boolean> => {
         .from('profiles')
         .select('last_login_date')
         .eq('id', uid)
-        .single();
+        .maybeSingle();
 
     if (profile && profile.last_login_date !== today) {
         const { error } = await supabase

@@ -103,7 +103,25 @@ const App: React.FC = () => {
         {step === AppStep.SELECTION && <SelectionScreen selectedSpread={selectedSpread} selectedCards={selectedCards} activeTooltipId={activeTooltipId} setActiveTooltipId={setActiveTooltipId} deck={deck} handleCardSelect={handleCardSelect} triggerRotateSound={triggerRotateSound} />}
         {step === AppStep.REVEAL && <RevealScreen selectedSpread={selectedSpread} selectedCards={selectedCards} setViewingCard={setViewingCard} getReading={getReading} />}
         {step === AppStep.READING && <ReadingScreen isLoading={isLoading} selectedCards={selectedCards} setViewingCard={setViewingCard} moonData={moonData} selectedMbti={selectedMbti} readingSections={readingSections} currentPage={currentPage} setCurrentPage={setCurrentPage} isHistoryMode={isHistoryMode} selectedSpread={selectedSpread} question={question} readingRef={readingRef} shareToKakao={shareToKakao} performShare={performShare} openHistory={() => setStep(AppStep.HISTORY)} handleResetClick={resetApp} GoogleAd={GoogleAd} />}
-        {step === AppStep.MYPAGE && (userProfile ? <MyPage userProfile={userProfile} onBack={() => setStep(AppStep.INTRO)} /> : <div className="fixed inset-0 flex items-center justify-center text-white/50 z-20">프로필을 불러오는 중입니다...</div>)}
+        {step === AppStep.MYPAGE && (userProfile ? <MyPage userProfile={userProfile} onBack={() => setStep(AppStep.INTRO)} /> : (
+          <div className="fixed inset-0 flex flex-col items-center justify-center text-white/70 z-20 gap-4">
+            {isSessionLoading ? (
+              <>
+                <Sparkles className="w-8 h-8 animate-spin text-indigo-400" />
+                <p>프로필을 불러오는 중입니다...</p>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="w-8 h-8 text-amber-400" />
+                <p>프로필을 불러올 수 없습니다.</p>
+                <div className="flex gap-3 mt-2">
+                  <button onClick={() => window.location.reload()} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm transition-colors">새로고침</button>
+                  <button onClick={() => setStep(AppStep.INTRO)} className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm transition-colors">홈으로</button>
+                </div>
+              </>
+            )}
+          </div>
+        ))}
         {step === AppStep.COMMUNITY && <div className="w-full max-w-4xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">커뮤니티</h2></div><BoardList key={boardRefreshKey} onPostClick={setSelectedPost} onWriteClick={() => currentUser ? setIsPostEditorOpen(true) : setIsAuthModalOpen(true)} /></div>}
         {step === AppStep.MBTI_ABOUT && <div className="w-full max-w-4xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">MBTI 가이드</h2></div><MbtiAbout /></div>}
         {step === AppStep.TAROT_ABOUT && <div className="w-full max-w-5xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">타로 가이드</h2></div><TarotAbout /></div>}
