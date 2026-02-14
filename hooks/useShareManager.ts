@@ -204,21 +204,67 @@ export const useShareManager = (
   }, [selectedCards]);
 
   const performShare = useCallback(async (type: 'text' | 'image' | 'both') => {
-    const textToShare = `🔮 MBTI 타로운세 결과\nhttps://mbtitarot.co.kr/`;
     if (type === 'text') {
-      if (navigator.share) await navigator.share({ text: textToShare });
-      else {
-        await navigator.clipboard.writeText(textToShare);
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
+      // 마크다운 기호를 제거하고 읽기 좋은 텍스트로 변환
+      const cleanMarkdown = (md: string): string => {
+        return md
+          .replace(/^### /gm, '▶ ')       // ### 제목 → ▶ 제목
+          .replace(/^## /gm, '■ ')         // ## 제목 → ■ 제목
+          .replace(/^# /gm, '★ ')          // # 제목 → ★ 제목
+          .replace(/\*\*([^*]+)\*\*/g, '$1') // **볼드** → 볼드
+          .replace(/\*([^*]+)\*/g, '$1')     // *이탤릭* → 이탤릭
+          .replace(/^>\s?/gm, '  ')          // > 인용 → 들여쓰기
+          .replace(/^\*\s+/gm, '• ')         // * 목록 → • 목록
+          .replace(/^-\s+/gm, '• ')          // - 목록 → • 목록
+          .replace(/---/g, '─────────────')  // 구분선
+          .replace(/\n{3,}/g, '\n\n')        // 과도한 빈줄 정리
+          .trim();
+      };
+
+      // 카드 정보 헤더
+      const cardInfo = selectedCards.map(c =>
+        `  ${c.position}: ${c.nameKo.split('(')[0].trim()} (${c.isReversed ? '역방향' : '정방향'})`
+      ).join('\n');
+
+      // 전체 운세 텍스트 조합
+      const fullText = [
+        `🔮 MBTI 타로운세 결과`,
+        `─────────────`,
+        `📌 운세 유형: ${selectedSpread.name}`,
+        question ? `💬 질문: ${question}` : '',
+        selectedMbti ? `🧬 MBTI: ${selectedMbti}` : '',
+        ``,
+        `🃏 선택한 카드`,
+        cardInfo,
+        `─────────────`,
+        ``,
+        cleanMarkdown(readingResult),
+        ``,
+        `─────────────`,
+        `🌐 나도 타로 보러가기: https://mbtitarot.co.kr/`,
+      ].filter(Boolean).join('\n');
+
+      try {
+        if (navigator.share) {
+          await navigator.share({ text: fullText });
+        } else {
+          await navigator.clipboard.writeText(fullText);
+          setIsCopied(true);
+          alert('전체 운세가 클립보드에 복사되었습니다! 원하는 곳에 붙여넣기 하세요.');
+          setTimeout(() => setIsCopied(false), 2000);
+        }
+      } catch (e) {
+        // share가 취소된 경우 등
+        console.warn("Share cancelled or failed:", e);
       }
     } else {
+      const textToShare = `🔮 MBTI 타로운세 결과\nhttps://mbtitarot.co.kr/`;
       const file = await generateShareImage();
       if (file && navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], text: textToShare });
       }
     }
-  }, [generateShareImage]);
+  }, [generateShareImage, readingResult, selectedCards, selectedSpread, selectedMbti, question]);
 
   return { isCopied, shareToKakao, performShare };
 };
