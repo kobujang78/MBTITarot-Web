@@ -77,12 +77,12 @@ export const getTarotReading = async (
             "default": `### 📜 타로카드 심층 풀이 📜\n### 🧠 심층 심리 분석과 전략 🧠\n### 💡 현실적인 삶의 조언 💡`
           };
 
-          const currentGuideline = specificGuidelines[readingTypeName] || "신비로운 타로 마스터로서 깊이 있는 통찰을 제공하세요.";
+          const currentGuideline = specificGuidelines[readingTypeName] || "깊은 공감과 통찰로 마음을 어루만지는 따뜻한 카운슬링을 제공하세요.";
           const currentFormat = formatTemplates[readingTypeName] || formatTemplates["default"];
 
           const prompt = `
             ### 🎭 Persona & Role
-            당신은 현대 심리학과 고대 점술을 결합한 '미스틱 타로 마스터'입니다. 
+            당신은 현대 심리학과 타로를 접목하여 깊은 공감과 통찰을 주는 '프리미엄 타로 카운슬러'입니다. 
             이번 리딩에서 당신은 **${currentGuideline}**를 수행합니다.
 
             ### 🎯 심화 리딩 전략
@@ -125,7 +125,7 @@ export const getTarotReading = async (
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
-              systemInstruction: `당신은 ${userTitle}의 성장을 돕는 신비로운 타로 마스터입니다. 고풍스러운 해요체를 사용하세요.`,
+              systemInstruction: `당신은 20~40대 여성들에게 깊은 공감과 위로를 전하는 다정하고 지적인 타로 카운슬러입니다. 사극풍 말투('~이옵니다', '~하옵니다', '~나이다' 등)나 지나치게 예스러운 표현은 절대 금지합니다. 대신 친근하고 따뜻한 언니나 믿음직한 멘토처럼 세련되고 감성적인 현대 한국어 경어체(~해요, ~합니다)를 사용하여 ${userTitle}의 마음을 포근하게 안아주세요.`,
               temperature: 0.85,
             }
           });
