@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../services/supabase';
 import { checkNicknameExists, registerUser, getUserProfile } from '../services/userService';
-import { X, Mail, Lock, User, UserPlus, LogIn, AlertCircle } from 'lucide-react';
+import { X, Mail, Lock, User, UserPlus, LogIn, AlertCircle, Github } from 'lucide-react';
 import Button from './Button';
 
 interface AuthModalProps {
@@ -142,26 +142,25 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
         }
     };
 
-    const handleGoogleLogin = async () => {
+    const handleOAuthLogin = async (provider: 'google' | 'kakao' | 'apple' | 'github') => {
         setError('');
         setIsLoading(true);
         try {
             const isCapacitor = window.Capacitor?.isNative;
             const redirectUrl = isCapacitor
-                ? 'com.honglabai.mbtitarot.app://google-auth'
+                ? `com.honglabai.mbtitarot.app://${provider}-auth`
                 : window.location.origin;
 
-            const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
+            const { error: oauthError } = await supabase.auth.signInWithOAuth({
+                provider,
                 options: {
                     redirectTo: redirectUrl
                 }
             });
             if (oauthError) throw oauthError;
-            // The logic continues in the useEffect after redirect (App.tsx handles the callback)
         } catch (err: any) {
             console.error(err);
-            setError('Google 로그인 중 오류가 발생했습니다.');
+            setError(`${provider.charAt(0).toUpperCase() + provider.slice(1)} 로그인 중 오류가 발생했습니다.`);
             setIsLoading(false);
         }
     };
@@ -189,179 +188,17 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                         </p>
                     </div>
 
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="p-4 space-y-3">
-                        {error && (
-                            <div className="p-3 bg-red-900/30 border border-red-800/50 rounded-lg flex items-center gap-3 text-red-200 text-sm animate-shake">
-                                <AlertCircle className="w-4 h-4 shrink-0" />
-                                <span>{error}</span>
-                            </div>
-                        )}
-
-                        <div className="space-y-3">
-                            {/* Email */}
-                            <div className="relative">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                <input
-                                    type="email"
-                                    placeholder="이메일 주소"
-                                    required
-                                    disabled={!!socialUser}
-                                    value={socialUser ? socialUser.email : email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    className={`w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-11 text-white focus:outline-none focus:border-indigo-500 transition-colors text-[13px] ${socialUser ? 'opacity-50' : ''}`}
-                                />
-                            </div>
-
-                            {/* Password */}
-                            {!socialUser && (
-                                <div className="relative">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                    <input
-                                        type="password"
-                                        placeholder="비밀번호"
-                                        required
-                                        value={password}
-                                        onChange={e => setPassword(e.target.value)}
-                                        className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-11 text-white focus:outline-none focus:border-indigo-500 transition-colors text-[13px]"
-                                    />
-                                </div>
-                            )}
-
-                            {!socialUser && !isLogin && (
-                                <div className="relative">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                    <input
-                                        type="password"
-                                        placeholder="비밀번호 확인"
-                                        required
-                                        value={confirmPassword}
-                                        onChange={e => setConfirmPassword(e.target.value)}
-                                        className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-11 text-white focus:outline-none focus:border-indigo-500 transition-colors text-[13px]"
-                                    />
-                                </div>
-                            )}
-
-                            {!isLogin && (
-                                <>
-                                    {/* Nickname */}
-                                    <div className="relative">
-                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                        <input
-                                            type="text"
-                                            placeholder="사용할 닉네임"
-                                            required
-                                            maxLength={10}
-                                            value={nickname}
-                                            onChange={e => setNickname(e.target.value)}
-                                            className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-11 text-white focus:outline-none focus:border-emerald-500 transition-colors text-[13px]"
-                                        />
-                                    </div>
-
-                                    {/* MBTI Selection */}
-                                    <div className="space-y-1">
-                                        <label className="text-[11px] font-bold text-slate-500 ml-1.5 flex items-center gap-1.5">
-                                            당신의 MBTI를 선택해주세요
-                                        </label>
-                                        <select
-                                            value={mbti}
-                                            onChange={e => setMbti(e.target.value)}
-                                            className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-emerald-500 appearance-none cursor-pointer text-[13px]"
-                                        >
-                                            {['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'].map(m => (
-                                                <option key={m} value={m}>{m}</option>
-                                            ))}
-                                        </select>
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowMbtiTest(true)}
-                                            className="text-[11px] text-indigo-400 hover:text-indigo-300 underline mt-1.5 ml-1 flex items-center gap-1 w-fit"
-                                        >
-                                            <span>🤔</span> MBTI를 모르시나요? 테스트하러 가기
-                                        </button>
-                                    </div>
-
-                                    {/* Referrer */}
-                                    <div className="relative">
-                                        <UserPlus className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                        <input
-                                            type="text"
-                                            placeholder="추천인 닉네임 (선택)"
-                                            value={referrer}
-                                            onChange={e => setReferrer(e.target.value)}
-                                            className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-11 text-white focus:outline-none focus:border-emerald-500 transition-colors text-[13px]"
-                                        />
-                                        {!referrer && (
-                                            <div className="px-1 mt-0.5">
-                                                <p className="text-[10px] text-slate-600 italic flex items-center gap-1">
-                                                    <span>🔮</span> 추천인 입력 시 두 분 모두에게 수정구슬 5개가 지급됩니다.
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Agreements */}
-                                    <div className="space-y-2 pt-1">
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                type="checkbox"
-                                                id="tos"
-                                                checked={agreedTos}
-                                                onChange={e => setAgreedTos(e.target.checked)}
-                                                className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-emerald-500 focus:ring-emerald-500/20"
-                                            />
-                                            <label htmlFor="tos" className="text-[11px] text-slate-400">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => onShowNotice?.('tos')}
-                                                    className="text-emerald-400 hover:underline inline-block mr-1 font-bold"
-                                                >
-                                                    이용약관
-                                                </button>
-                                                에 동의합니다 (필수)
-                                            </label>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <input
-                                                type="checkbox"
-                                                id="privacy"
-                                                checked={agreedPrivacy}
-                                                onChange={e => setAgreedPrivacy(e.target.checked)}
-                                                className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-emerald-500 focus:ring-emerald-500/20"
-                                            />
-                                            <label htmlFor="privacy" className="text-[11px] text-slate-400">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => onShowNotice?.('privacy')}
-                                                    className="text-emerald-400 hover:underline inline-block mr-1 font-bold"
-                                                >
-                                                    개인정보 처리방침
-                                                </button>
-                                                에 동의합니다 (필수)
-                                            </label>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-
-                        <Button
-                            type="submit"
-                            className="w-full py-2.5 mt-1 font-bold text-[13px]"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? '처리 중...' : (isLogin ? '로그인' : '회원가입 완료')}
-                        </Button>
-
-                        <div className="text-center pt-3 border-t border-white/5 mt-3 space-y-3">
-                            {!socialUser && (
+                    {/* Social Login Section */}
+                    <div className="px-6 pb-2 space-y-2">
+                        {!socialUser && (
+                            <>
+                                {/* Google */}
                                 <button
                                     type="button"
-                                    onClick={handleGoogleLogin}
-                                    className="w-full flex items-center bg-white border border-[#dadce0] rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden"
-                                    style={{ height: '40px' }}
+                                    onClick={() => handleOAuthLogin('google')}
+                                    className="w-full flex items-center bg-white border border-[#dadce0] rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[44px]"
                                 >
-                                    <div className="px-3 flex items-center justify-center border-r border-transparent">
+                                    <div className="px-4 flex items-center justify-center">
                                         <svg width="18" height="18" viewBox="0 0 18 18">
                                             <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4" />
                                             <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.331C2.438 15.983 5.482 18 9 18z" fill="#34A853" />
@@ -369,40 +206,176 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                                             <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.963L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#EA4335" />
                                         </svg>
                                     </div>
-                                    <span className="flex-1 text-[#3c4043] font-medium text-sm text-center pr-10">
-                                        Google 계정으로 시작하기
-                                    </span>
+                                    <span className="flex-1 text-[#3c4043] font-medium text-sm text-center pr-10">Google 계정으로 시작하기</span>
                                 </button>
-                            )}
 
-                            <div className="text-center">
-                                <p className="text-slate-500 text-[10px] mb-1">
-                                    {isLogin ? '처음이신가요?' : (socialUser ? '프로필을 완성해주세요' : '이미 회원이신가요?')}
-                                </p>
+                                {/* Kakao */}
+                                <button
+                                    type="button"
+                                    onClick={() => handleOAuthLogin('kakao')}
+                                    className="w-full flex items-center bg-[#FEE500] rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[44px]"
+                                >
+                                    <div className="px-4 flex items-center justify-center">
+                                        <svg width="18" height="18" viewBox="0 0 18 18">
+                                            <path fill="#3A1D1D" d="M9 4C5.134 4 2 6.164 2 8.832c0 1.734 1.312 3.25 3.32 4.103-.134.464-.485 1.678-.555 1.94-.088.33.111.326.234.246.096-.063 1.545-1.048 2.162-1.464.274.039.553.059.839.059 3.866 0 7-2.164 7-4.832C16 6.164 12.866 4 9 4z" />
+                                        </svg>
+                                    </div>
+                                    <span className="flex-1 text-[#3A1D1D] font-medium text-sm text-center pr-10">Kakao 계정으로 시작하기</span>
+                                </button>
+
+                                {/* Apple */}
+                                <button
+                                    type="button"
+                                    onClick={() => handleOAuthLogin('apple')}
+                                    className="w-full flex items-center bg-black border border-slate-700 rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[44px]"
+                                >
+                                    <div className="px-4 flex items-center justify-center">
+                                        <svg width="18" height="18" viewBox="0 0 18 18" fill="white">
+                                            <path d="M12.984 9.69c-.012-1.92 1.572-2.844 1.644-2.892-.888-1.308-2.28-1.488-2.772-1.512-1.176-.12-2.304.696-2.904.696-.6 0-1.524-.684-2.508-.684-1.284.012-2.472.744-3.132 1.896-1.344 2.328-.348 5.76.96 7.644.636.924 1.404 1.956 2.4 1.92 1.056-.048 1.452-.684 2.724-.684 1.26 0 1.62.684 2.736.66 1.14-.024 1.8-.936 2.496-1.944.804-1.176 1.128-2.316 1.152-2.376-.024-.012-2.22-.852-2.244-3.372zM11.196 3.96c.528-.648.888-1.536.792-2.424-.756.036-1.68.516-2.22 1.14-.48.552-.9 1.452-.78 2.328.852.06 1.704-.42 2.208-1.044z" />
+                                        </svg>
+                                    </div>
+                                    <span className="flex-1 text-white font-medium text-sm text-center pr-10">Apple 계정으로 시작하기</span>
+                                </button>
+
+                                {/* GitHub */}
+                                <button
+                                    type="button"
+                                    onClick={() => handleOAuthLogin('github')}
+                                    className="w-full flex items-center bg-[#24292e] border border-slate-600 rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[44px]"
+                                >
+                                    <div className="px-4 flex items-center justify-center">
+                                        <Github className="w-[18px] h-[18px] text-white" />
+                                    </div>
+                                    <span className="flex-1 text-white font-medium text-sm text-center pr-10">GitHub 계정으로 시작하기</span>
+                                </button>
+
+                                <div className="relative py-4">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <div className="w-full border-t border-slate-800"></div>
+                                    </div>
+                                    <div className="relative flex justify-center text-[10px] uppercase">
+                                        <span className="bg-slate-900 px-2 text-slate-500 font-bold tracking-widest">또는 이메일로 계속하기</span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-3">
+                            <div className="space-y-3">
+                                {/* Email */}
+                                <div className="relative">
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                                    <input
+                                        type="email"
+                                        placeholder="이메일 주소"
+                                        required
+                                        disabled={!!socialUser}
+                                        value={socialUser ? socialUser.email : email}
+                                        onChange={e => setEmail(e.target.value)}
+                                        className={`w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-10 text-white focus:outline-none focus:border-indigo-500 transition-colors text-[12px] ${socialUser ? 'opacity-50' : ''}`}
+                                    />
+                                </div>
+
+                                {/* Password */}
                                 {!socialUser && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsLogin(!isLogin)}
-                                        className={`text-xs font-bold transition-all hover:underline ${isLogin ? 'text-emerald-400 hover:text-emerald-300' : 'text-indigo-400 hover:text-indigo-300'}`}
-                                    >
-                                        {isLogin ? '회원가입하고 혜택받기' : '로그인하러 가기'}
-                                    </button>
+                                    <div className="relative">
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                                        <input
+                                            type="password"
+                                            placeholder="비밀번호"
+                                            required
+                                            value={password}
+                                            onChange={e => setPassword(e.target.value)}
+                                            className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-10 text-white focus:outline-none focus:border-indigo-500 transition-colors text-[12px]"
+                                        />
+                                    </div>
                                 )}
-                                {socialUser && (
-                                    <button
-                                        type="button"
-                                        onClick={async () => {
-                                            await supabase.auth.signOut();
-                                            onClose();
-                                        }}
-                                        className="text-xs font-bold text-slate-500 hover:text-slate-300 underline mt-2"
-                                    >
-                                        다른 계정으로 로그인하기 (로그아웃)
-                                    </button>
+
+                                {!socialUser && !isLogin && (
+                                    <div className="relative">
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                                        <input
+                                            type="password"
+                                            placeholder="비밀번호 확인"
+                                            required
+                                            value={confirmPassword}
+                                            onChange={e => setConfirmPassword(e.target.value)}
+                                            className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-10 text-white focus:outline-none focus:border-indigo-500 transition-colors text-[12px]"
+                                        />
+                                    </div>
+                                )}
+
+                                {!isLogin && (
+                                    <>
+                                        {/* Nickname */}
+                                        <div className="relative">
+                                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                                            <input
+                                                type="text"
+                                                placeholder="사용할 닉네임"
+                                                required
+                                                maxLength={10}
+                                                value={nickname}
+                                                onChange={e => setNickname(e.target.value)}
+                                                className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-10 text-white focus:outline-none focus:border-emerald-500 transition-colors text-[12px]"
+                                            />
+                                        </div>
+
+                                        {/* MBTI Selection */}
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold text-slate-500 ml-1.5">MBTI 선택</label>
+                                            <select
+                                                value={mbti}
+                                                onChange={e => setMbti(e.target.value)}
+                                                className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-emerald-500 appearance-none cursor-pointer text-[12px]"
+                                            >
+                                                {['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'].map(m => (
+                                                    <option key={m} value={m}>{m}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </>
                                 )}
                             </div>
+
+                            <Button
+                                type="submit"
+                                className="w-full py-2.5 mt-2 font-bold text-[13px]"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? '처리 중...' : (isLogin ? '이메일 로그인' : '이메일 회원가입 완료')}
+                            </Button>
+                        </form>
+
+                        <div className="text-center pt-2">
+                            <p className="text-slate-500 text-[10px] mb-1">
+                                {isLogin ? '처음이신가요?' : (socialUser ? '프로필을 완성해주세요' : '이미 회원이신가요?')}
+                            </p>
+                            {!socialUser && (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsLogin(!isLogin)}
+                                    className={`text-[11px] font-bold transition-all hover:underline ${isLogin ? 'text-emerald-400 hover:text-emerald-300' : 'text-indigo-400 hover:text-indigo-300'}`}
+                                >
+                                    {isLogin ? '일반 회원가입하기' : '일반 로그인하러 가기'}
+                                </button>
+                            )}
+                            {socialUser && (
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        await supabase.auth.signOut();
+                                        onClose();
+                                    }}
+                                    className="text-[11px] font-bold text-slate-500 hover:text-slate-300 underline mt-2"
+                                >
+                                    다른 계정으로 로그인하기 (로그아웃)
+                                </button>
+                            )}
                         </div>
-                    </form>
+                    </div>
+                </div>
+            </div>
                 </div >
             </div >
 
