@@ -18,7 +18,7 @@ import { useCommunityManager } from './hooks/useCommunityManager';
 
 // Components
 import GoogleAd from './components/GoogleAd';
-const AuthModal = React.lazy(() => import('./components/AuthModal'));
+import AuthModal from './components/AuthModal';
 const BoardList = React.lazy(() => import('./components/BoardList'));
 const PostEditor = React.lazy(() => import('./components/PostEditor'));
 const PostDetail = React.lazy(() => import('./components/PostDetail'));

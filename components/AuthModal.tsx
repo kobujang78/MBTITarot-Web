@@ -180,9 +180,10 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                         <div className="inline-flex p-1.5 rounded-xl bg-slate-800 mb-2 border border-white/5">
                             {isLogin ? <LogIn className="w-4 h-4 text-indigo-400" /> : <UserPlus className="w-4 h-4 text-emerald-400" />}
                         </div>
-                        <h2 className="text-lg font-bold text-white leading-tight">
-                            {isLogin ? '반가워요!' : '환영합니다!'}
+                        <h2 className="text-lg font-bold text-white leading-tight uppercase tracking-wide">
+                            {isLogin ? '계정 로그인' : '회원가입'}
                         </h2>
+                        <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-medium">SNS 계정으로 간편하게 시작하세요</p>
                         <p className="text-slate-500 text-[10px] mt-0.5">
                             {isLogin ? '로그인이 필요합니다' : '회원가입하고 혜택을 받으세요'}
                         </p>

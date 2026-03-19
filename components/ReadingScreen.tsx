@@ -122,10 +122,10 @@ const ReadingScreen: React.FC<ReadingScreenProps> = ({
                   <div className="animate-fadeIn">
                     <ReactMarkdown
                       components={{
-                        h1: ({ node, ...props }) => <h1 className="text-xl md:text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-white to-slate-300 mb-3 mt-1 font-bold border-b border-slate-700/50 pb-2 drop-shadow-sm" {...props} />,
-                        h2: ({ node, ...props }) => <h2 className="text-lg md:text-xl font-serif text-slate-100 mb-3 mt-5 font-bold flex items-center gap-2 border-l-4 border-slate-600 pl-3 py-1 bg-slate-800/20 rounded-r-md drop-shadow-sm" {...props} />,
-                        h3: ({ node, ...props }) => <h3 className="text-base md:text-lg font-serif text-slate-200 mb-2 mt-4 font-bold opacity-90" {...props} />,
-                        p: ({ node, ...props }) => <p className="text-slate-300 leading-relaxed mb-4 text-sm md:text-base font-normal tracking-wide break-keep" {...props} />,
+                        h1: ({ node, ...props }) => <h1 className="text-lg md:text-xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-white to-slate-300 mb-3 mt-1 font-bold border-b border-slate-700/50 pb-2 drop-shadow-sm" {...props} />,
+                        h2: ({ node, ...props }) => <h2 className="text-base md:text-lg font-serif text-slate-100 mb-3 mt-5 font-bold flex items-center gap-2 border-l-4 border-slate-600 pl-3 py-1 bg-slate-800/20 rounded-r-md drop-shadow-sm" {...props} />,
+                        h3: ({ node, ...props }) => <h3 className="text-sm md:text-base font-serif text-slate-200 mb-2 mt-4 font-bold opacity-90" {...props} />,
+                        p: ({ node, ...props }) => <p className="text-slate-300 leading-relaxed mb-4 text-[13px] md:text-[15px] font-normal tracking-wide break-keep" {...props} />,
                         strong: ({ node, ...props }) => <strong className="text-amber-200 font-bold drop-shadow-[0_0_1px_rgba(255,191,0,0.3)]" {...props} />,
                         li: ({ node, children, ...props }) => {
                           const text = String(children);
