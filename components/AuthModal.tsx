@@ -188,15 +188,22 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                         </p>
                     </div>
 
-                    {/* Social Login Section */}
-                    <div className="px-6 pb-2 space-y-2">
+                    {/* Content Area */}
+                    <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                        {error && (
+                            <div className="p-3 bg-red-900/30 border border-red-800/50 rounded-lg flex items-center gap-3 text-red-200 text-xs animate-shake">
+                                <AlertCircle className="w-4 h-4 shrink-0" />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
                         {!socialUser && (
-                            <>
+                            <div className="space-y-2">
                                 {/* Google */}
                                 <button
                                     type="button"
                                     onClick={() => handleOAuthLogin('google')}
-                                    className="w-full flex items-center bg-white border border-[#dadce0] rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[44px]"
+                                    className="w-full flex items-center bg-white border border-[#dadce0] rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[42px]"
                                 >
                                     <div className="px-4 flex items-center justify-center">
                                         <svg width="18" height="18" viewBox="0 0 18 18">
@@ -206,63 +213,62 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                                             <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.963L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#EA4335" />
                                         </svg>
                                     </div>
-                                    <span className="flex-1 text-[#3c4043] font-medium text-sm text-center pr-10">Google 계정으로 시작하기</span>
+                                    <span className="flex-1 text-[#3c4043] font-medium text-[13px] text-center pr-10">Google 로그인</span>
                                 </button>
 
                                 {/* Kakao */}
                                 <button
                                     type="button"
                                     onClick={() => handleOAuthLogin('kakao')}
-                                    className="w-full flex items-center bg-[#FEE500] rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[44px]"
+                                    className="w-full flex items-center bg-[#FEE500] rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[42px]"
                                 >
                                     <div className="px-4 flex items-center justify-center">
                                         <svg width="18" height="18" viewBox="0 0 18 18">
                                             <path fill="#3A1D1D" d="M9 4C5.134 4 2 6.164 2 8.832c0 1.734 1.312 3.25 3.32 4.103-.134.464-.485 1.678-.555 1.94-.088.33.111.326.234.246.096-.063 1.545-1.048 2.162-1.464.274.039.553.059.839.059 3.866 0 7-2.164 7-4.832C16 6.164 12.866 4 9 4z" />
                                         </svg>
                                     </div>
-                                    <span className="flex-1 text-[#3A1D1D] font-medium text-sm text-center pr-10">Kakao 계정으로 시작하기</span>
+                                    <span className="flex-1 text-[#3A1D1D] font-medium text-[13px] text-center pr-10">Kakao 로그인</span>
                                 </button>
 
                                 {/* Apple */}
                                 <button
                                     type="button"
                                     onClick={() => handleOAuthLogin('apple')}
-                                    className="w-full flex items-center bg-black border border-slate-700 rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[44px]"
+                                    className="w-full flex items-center bg-black border border-slate-700 rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[42px]"
                                 >
                                     <div className="px-4 flex items-center justify-center">
                                         <svg width="18" height="18" viewBox="0 0 18 18" fill="white">
                                             <path d="M12.984 9.69c-.012-1.92 1.572-2.844 1.644-2.892-.888-1.308-2.28-1.488-2.772-1.512-1.176-.12-2.304.696-2.904.696-.6 0-1.524-.684-2.508-.684-1.284.012-2.472.744-3.132 1.896-1.344 2.328-.348 5.76.96 7.644.636.924 1.404 1.956 2.4 1.92 1.056-.048 1.452-.684 2.724-.684 1.26 0 1.62.684 2.736.66 1.14-.024 1.8-.936 2.496-1.944.804-1.176 1.128-2.316 1.152-2.376-.024-.012-2.22-.852-2.244-3.372zM11.196 3.96c.528-.648.888-1.536.792-2.424-.756.036-1.68.516-2.22 1.14-.48.552-.9 1.452-.78 2.328.852.06 1.704-.42 2.208-1.044z" />
                                         </svg>
                                     </div>
-                                    <span className="flex-1 text-white font-medium text-sm text-center pr-10">Apple 계정으로 시작하기</span>
+                                    <span className="flex-1 text-white font-medium text-[13px] text-center pr-10">Apple 로그인</span>
                                 </button>
 
                                 {/* GitHub */}
                                 <button
                                     type="button"
                                     onClick={() => handleOAuthLogin('github')}
-                                    className="w-full flex items-center bg-[#24292e] border border-slate-600 rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[44px]"
+                                    className="w-full flex items-center bg-[#24292e] border border-slate-600 rounded-xl hover:shadow-md transition-shadow duration-200 overflow-hidden h-[42px]"
                                 >
                                     <div className="px-4 flex items-center justify-center">
                                         <Github className="w-[18px] h-[18px] text-white" />
                                     </div>
-                                    <span className="flex-1 text-white font-medium text-sm text-center pr-10">GitHub 계정으로 시작하기</span>
+                                    <span className="flex-1 text-white font-medium text-[13px] text-center pr-10">GitHub 로그인</span>
                                 </button>
 
-                                <div className="relative py-4">
+                                <div className="relative py-2">
                                     <div className="absolute inset-0 flex items-center">
-                                        <div className="w-full border-t border-slate-800"></div>
+                                        <div className="w-full border-t border-white/5"></div>
                                     </div>
                                     <div className="relative flex justify-center text-[10px] uppercase">
-                                        <span className="bg-slate-900 px-2 text-slate-500 font-bold tracking-widest">또는 이메일로 계속하기</span>
+                                        <span className="bg-slate-900 px-3 text-slate-500 font-bold tracking-widest">또는 이메일</span>
                                     </div>
                                 </div>
-                            </>
+                            </div>
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-3">
-                            <div className="space-y-3">
-                                {/* Email */}
+                            <div className="space-y-2">
                                 <div className="relative">
                                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
                                     <input
@@ -276,7 +282,6 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                                     />
                                 </div>
 
-                                {/* Password */}
                                 {!socialUser && (
                                     <div className="relative">
                                         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
@@ -304,63 +309,85 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                                         />
                                     </div>
                                 )}
-
-                                {!isLogin && (
-                                    <>
-                                        {/* Nickname */}
-                                        <div className="relative">
-                                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-                                            <input
-                                                type="text"
-                                                placeholder="사용할 닉네임"
-                                                required
-                                                maxLength={10}
-                                                value={nickname}
-                                                onChange={e => setNickname(e.target.value)}
-                                                className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-10 text-white focus:outline-none focus:border-emerald-500 transition-colors text-[12px]"
-                                            />
-                                        </div>
-
-                                        {/* MBTI Selection */}
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-slate-500 ml-1.5">MBTI 선택</label>
-                                            <select
-                                                value={mbti}
-                                                onChange={e => setMbti(e.target.value)}
-                                                className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 text-white focus:outline-none focus:border-emerald-500 appearance-none cursor-pointer text-[12px]"
-                                            >
-                                                {['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'].map(m => (
-                                                    <option key={m} value={m}>{m}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </>
-                                )}
                             </div>
+
+                            {!isLogin && (
+                                <div className="space-y-3 pt-1 animate-fadeIn">
+                                    <div className="relative">
+                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                                        <input
+                                            type="text"
+                                            placeholder="사용할 닉네임"
+                                            required
+                                            maxLength={10}
+                                            value={nickname}
+                                            onChange={e => setNickname(e.target.value)}
+                                            className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-10 text-white focus:outline-none focus:border-emerald-500 transition-colors text-[12px]"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <div className="flex items-center justify-between px-1">
+                                            <label className="text-[10px] font-bold text-slate-500 tracking-tighter">MBTI 선택</label>
+                                            <button type="button" onClick={() => setShowMbtiTest(true)} className="text-[10px] text-indigo-400 hover:underline">테스트하기</button>
+                                        </div>
+                                        <select
+                                            value={mbti}
+                                            onChange={e => setMbti(e.target.value)}
+                                            className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-1.5 px-4 text-white focus:outline-none focus:border-emerald-500 appearance-none cursor-pointer text-[12px]"
+                                        >
+                                            {['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'].map(m => (
+                                                <option key={m} value={m}>{m}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="relative">
+                                        <UserPlus className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                                        <input
+                                            type="text"
+                                            placeholder="추천인 (선택)"
+                                            value={referrer}
+                                            onChange={e => setReferrer(e.target.value)}
+                                            className="w-full bg-slate-800/30 border border-slate-700/50 rounded-xl py-2 px-4 pl-10 text-white focus:outline-none focus:border-emerald-500 transition-colors text-[12px]"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1 pt-1">
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" id="tos" checked={agreedTos} onChange={e => setAgreedTos(e.target.checked)} className="w-3 h-3 rounded border-slate-700 bg-slate-800 text-emerald-500" />
+                                            <label htmlFor="tos" className="text-[10px] text-slate-500"><button type="button" onClick={() => onShowNotice?.('tos')} className="text-slate-400 hover:underline">이용약관</button> 동의 (필수)</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" id="privacy" checked={agreedPrivacy} onChange={e => setAgreedPrivacy(e.target.checked)} className="w-3 h-3 rounded border-slate-700 bg-slate-800 text-emerald-500" />
+                                            <label htmlFor="privacy" className="text-[10px] text-slate-500"><button type="button" onClick={() => onShowNotice?.('privacy')} className="text-slate-400 hover:underline">개인정보 처리방침</button> 동의 (필수)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             <Button
                                 type="submit"
                                 className="w-full py-2.5 mt-2 font-bold text-[13px]"
                                 disabled={isLoading}
                             >
-                                {isLoading ? '처리 중...' : (isLogin ? '이메일 로그인' : '이메일 회원가입 완료')}
+                                {isLoading ? '처리 중...' : (socialUser ? '가입 완료하기' : (isLogin ? '로그인' : '회원 가입'))}
                             </Button>
                         </form>
 
-                        <div className="text-center pt-2">
+                        <div className="text-center pt-2 border-t border-white/5">
                             <p className="text-slate-500 text-[10px] mb-1">
-                                {isLogin ? '처음이신가요?' : (socialUser ? '프로필을 완성해주세요' : '이미 회원이신가요?')}
+                                {isLogin ? '처음이신가요?' : (socialUser ? '기존 계정이 있으신가요?' : '이미 회원이신가요?')}
                             </p>
-                            {!socialUser && (
+                            {!socialUser ? (
                                 <button
                                     type="button"
                                     onClick={() => setIsLogin(!isLogin)}
                                     className={`text-[11px] font-bold transition-all hover:underline ${isLogin ? 'text-emerald-400 hover:text-emerald-300' : 'text-indigo-400 hover:text-indigo-300'}`}
                                 >
-                                    {isLogin ? '일반 회원가입하기' : '일반 로그인하러 가기'}
+                                    {isLogin ? '새로 가입하고 혜택받기' : '기존 계정으로 로그인'}
                                 </button>
-                            )}
-                            {socialUser && (
+                            ) : (
                                 <button
                                     type="button"
                                     onClick={async () => {
@@ -369,15 +396,13 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                                     }}
                                     className="text-[11px] font-bold text-slate-500 hover:text-slate-300 underline mt-2"
                                 >
-                                    다른 계정으로 로그인하기 (로그아웃)
+                                    다른 계정 사용 (로그아웃)
                                 </button>
                             )}
                         </div>
                     </div>
                 </div>
             </div>
-                </div >
-            </div >
 
             {/* MBTI Test Modal */}
             {

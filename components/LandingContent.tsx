@@ -153,7 +153,11 @@ const generateFaqSchema = () => {
     };
 };
 
-const LandingContent: React.FC = () => {
+interface LandingContentProps {
+    onStart?: () => void;
+}
+
+const LandingContent: React.FC<LandingContentProps> = ({ onStart }) => {
     const [activeMbti, setActiveMbti] = React.useState<string>('INTJ'); // Default expanded (First item)
 
     return (
@@ -410,6 +414,31 @@ const LandingContent: React.FC = () => {
                             <p className="text-[10px] text-slate-500 text-right">- {review.author}</p>
                         </div>
                     ))}
+                </div>
+            </section>
+
+            {/* Final CTA Section */}
+            <section className="py-12 mt-8 text-center space-y-8 animate-fadeIn">
+                <div className="relative inline-block group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+                    <div className="relative bg-slate-900/60 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl space-y-6">
+                        <div className="space-y-2">
+                            <h3 className="text-2xl md:text-3xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-white to-slate-200">
+                                당신의 운명이 기다리고 있습니다
+                            </h3>
+                            <p className="text-slate-400 text-sm md:text-base">
+                                MBTI와 타로가 만나는 특별한 순간, 지금 바로 무료로 시작해보세요.
+                            </p>
+                        </div>
+                        
+                        <button 
+                            onClick={onStart}
+                            className="group relative inline-flex items-center justify-center px-12 py-4 font-bold text-white transition-all duration-300 bg-indigo-600 rounded-xl hover:bg-indigo-500 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(79,70,229,0.4)]"
+                        >
+                            <Sparkles className="w-5 h-5 mr-3 group-hover:animate-spin" />
+                            무료로 시작하기
+                        </button>
+                    </div>
                 </div>
             </section>
 

@@ -88,6 +88,15 @@ const App: React.FC = () => {
     }
   }, [step]);
 
+  // Entry Flow: Redirect unauthenticated users to Landing Page (SQUARE)
+  React.useEffect(() => {
+    if (!isSessionLoading && !currentUser && step === AppStep.INTRO) {
+      setStep(AppStep.SQUARE);
+    } else if (!isSessionLoading && currentUser && step === AppStep.SQUARE) {
+      setStep(AppStep.INTRO);
+    }
+  }, [isSessionLoading, currentUser, step]);
+
   // Handle incomplete profile for social login users
   React.useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -100,13 +109,12 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, [isSessionLoading, currentUser, userProfile, isAuthModalOpen]);
 
-  // Auto-redirect to MyPage after login if the user was trying to access it
+  // Auto-redirect to Intro after login if the user was on Landing Page
   React.useEffect(() => {
-    if (currentUser && userProfile && isAuthModalOpen) {
-      setIsAuthModalOpen(false);
-      setStep(AppStep.MYPAGE);
+    if (currentUser && userProfile && step === AppStep.SQUARE) {
+      setStep(AppStep.INTRO);
     }
-  }, [currentUser, userProfile, isAuthModalOpen]);
+  }, [currentUser, userProfile, step]);
 
   const renderUserBadge = () => userProfile && (
     <div className="flex items-center gap-2 bg-slate-900/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/5 shadow-lg">
@@ -160,7 +168,7 @@ const App: React.FC = () => {
         {step === AppStep.COMMUNITY && <div className="w-full max-w-4xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">커뮤니티</h2></div><BoardList key={boardRefreshKey} onPostClick={setSelectedPost} onWriteClick={() => currentUser ? setIsPostEditorOpen(true) : setIsAuthModalOpen(true)} /></div>}
         {step === AppStep.MBTI_ABOUT && <div className="w-full max-w-4xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">MBTI 가이드</h2></div><MbtiAbout /></div>}
         {step === AppStep.TAROT_ABOUT && <div className="w-full max-w-5xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">타로 가이드</h2></div><TarotAbout /></div>}
-        {step === AppStep.SQUARE && <div className="w-full max-w-5xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">타로광장</h2></div><Suspense fallback={<div className="flex items-center justify-center p-20"><Sparkles className="w-8 h-8 animate-spin text-indigo-400" /></div>}><LandingContent /></Suspense></div>}
+        {step === AppStep.SQUARE && <div className="w-full max-w-5xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">타로광장</h2></div><Suspense fallback={<div className="flex items-center justify-center p-20"><Sparkles className="w-8 h-8 animate-spin text-indigo-400" /></div>}><LandingContent onStart={() => setIsAuthModalOpen(true)} /></Suspense></div>}
       </main>
 
       {viewingCard && (
@@ -206,7 +214,7 @@ const App: React.FC = () => {
         currentStep={step}
         onStepChange={(newStep) => {
           console.log(`Nav changed to: ${newStep}, User: ${currentUser ? 'LoggedIn' : 'Guest'}`);
-          if (newStep === AppStep.MYPAGE && !currentUser) {
+          if ((newStep === AppStep.MYPAGE || newStep === AppStep.INTRO) && !currentUser) {
             setIsAuthModalOpen(true);
           } else {
             setStep(newStep);
