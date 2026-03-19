@@ -91,7 +91,9 @@ const App: React.FC = () => {
 
   // Entry Flow: Redirect unauthenticated users to Landing Page (SQUARE)
   React.useEffect(() => {
-    if (!isSessionLoading && !currentUser && step === AppStep.INTRO) {
+    const isRestrictedStep = step === AppStep.INTRO || step === AppStep.MYPAGE || step === AppStep.HISTORY || step === AppStep.COMMUNITY;
+    
+    if (!isSessionLoading && !currentUser && isRestrictedStep) {
       setStep(AppStep.SQUARE);
     } else if (!isSessionLoading && currentUser && step === AppStep.SQUARE) {
       setStep(AppStep.INTRO);
