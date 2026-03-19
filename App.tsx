@@ -19,6 +19,7 @@ import { useCommunityManager } from './hooks/useCommunityManager';
 // Components
 import GoogleAd from './components/GoogleAd';
 import AuthModal from './components/AuthModal';
+import Button from './components/Button';
 const BoardList = React.lazy(() => import('./components/BoardList'));
 const PostEditor = React.lazy(() => import('./components/PostEditor'));
 const PostDetail = React.lazy(() => import('./components/PostDetail'));
@@ -147,19 +148,22 @@ const App: React.FC = () => {
         {step === AppStep.REVEAL && <RevealScreen selectedSpread={selectedSpread} selectedCards={selectedCards} setViewingCard={setViewingCard} getReading={getReading} />}
         {step === AppStep.READING && <ReadingScreen isLoading={isLoading} selectedCards={selectedCards} setViewingCard={setViewingCard} moonData={moonData} selectedMbti={selectedMbti} readingSections={readingSections} currentPage={currentPage} setCurrentPage={setCurrentPage} isHistoryMode={isHistoryMode} selectedSpread={selectedSpread} question={question} readingRef={readingRef} shareToKakao={shareToKakao} performShare={performShare} openHistory={() => setStep(AppStep.HISTORY)} handleResetClick={resetApp} GoogleAd={GoogleAd} />}
         {step === AppStep.MYPAGE && (userProfile ? <MyPage userProfile={userProfile} onBack={() => setStep(AppStep.INTRO)} /> : (
-          <div className="fixed inset-0 flex flex-col items-center justify-center text-white/70 z-20 gap-4">
+          <div className="fixed inset-0 flex flex-col items-center justify-center text-white/70 z-20 gap-4 bg-slate-950/80 backdrop-blur-md">
             {isSessionLoading ? (
               <>
                 <Sparkles className="w-8 h-8 animate-spin text-indigo-400" />
-                <p>프로필을 불러오는 중입니다...</p>
+                <p className="font-medium animate-pulse">프로필을 불러오는 중입니다...</p>
               </>
             ) : (
               <>
                 <AlertCircle className="w-8 h-8 text-amber-400" />
-                <p>프로필을 불러올 수 없습니다.</p>
-                <div className="flex gap-3 mt-2">
-                  <button onClick={() => window.location.reload()} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm transition-colors">새로고침</button>
-                  <button onClick={() => setStep(AppStep.INTRO)} className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm transition-colors">홈으로</button>
+                <div className="text-center space-y-1">
+                  <p className="font-bold text-white">프로필을 불러올 수 없습니다.</p>
+                  <p className="text-xs text-slate-400">데이터 동기화 중 오류가 발생했거나 서비스 연결이 원활하지 않습니다.</p>
+                </div>
+                <div className="flex gap-3 mt-4">
+                  <Button variant="secondary" onClick={() => window.location.reload()} className="px-6">다시 시도</Button>
+                  <Button variant="secondary" onClick={() => supabase.auth.signOut()} className="px-6 text-rose-400">로그아웃</Button>
                 </div>
               </>
             )}

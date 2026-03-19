@@ -134,29 +134,32 @@ export const useUserSession = () => {
       const user = session?.user ?? null;
       if (!isMountedRef.current) return;
 
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        setCurrentUser(user);
-        const profile = await loadProfile(user);
-        if (isMountedRef.current) {
-          setUserProfile(profile);
-          if (profile && user) {
-            subscribeToProfile(user.id);
-          }
-          setIsSessionLoading(false);
-        }
-      } else if (event === 'SIGNED_OUT') {
-        setCurrentUser(null);
-        setUserProfile(null);
-        hasCountedVisit.current = false;
-        if (profileSubRef.current) profileSubRef.current.unsubscribe();
-        setIsSessionLoading(false);
-      } else if (event === 'INITIAL_SESSION') {
-        // Handled by init() but good to have as backup
-        if (user && !currentUser) {
+      try {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           setCurrentUser(user);
           const profile = await loadProfile(user);
-          if (isMountedRef.current) setUserProfile(profile);
+          if (isMountedRef.current) {
+            setUserProfile(profile);
+            if (profile && user) {
+              subscribeToProfile(user.id);
+            }
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setCurrentUser(null);
+          setUserProfile(null);
+          hasCountedVisit.current = false;
+          if (profileSubRef.current) profileSubRef.current.unsubscribe();
+        } else if (event === 'INITIAL_SESSION') {
+          if (user && !currentUser) {
+            setCurrentUser(user);
+            const profile = await loadProfile(user);
+            if (isMountedRef.current) setUserProfile(profile);
+          }
         }
+      } catch (err) {
+        console.error("Auth change error:", err);
+      } finally {
+        if (isMountedRef.current) setIsSessionLoading(false);
       }
     });
 
