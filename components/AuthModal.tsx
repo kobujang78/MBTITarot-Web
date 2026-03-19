@@ -181,7 +181,7 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                             {isLogin ? <LogIn className="w-4 h-4 text-indigo-400" /> : <UserPlus className="w-4 h-4 text-emerald-400" />}
                         </div>
                         <h2 className="text-lg font-bold text-white leading-tight uppercase tracking-wide">
-                            {isLogin ? '계정 로그인' : '회원가입'}
+                            로그인
                         </h2>
                         <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-medium">SNS 계정으로 간편하게 시작하세요</p>
                         <p className="text-slate-500 text-[10px] mt-0.5">
@@ -191,6 +191,26 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
 
                     {/* Content Area */}
                     <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                        {/* Tabs Integration */}
+                        {!socialUser && (
+                            <div className="flex p-1 bg-slate-800/80 rounded-xl mb-2 border border-white/5 shadow-inner">
+                                <button
+                                    onClick={() => setIsLogin(true)}
+                                    className={`flex-1 py-2.5 text-[13px] font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${isLogin ? 'bg-indigo-600 text-white shadow-lg scale-[1.02]' : 'text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    <LogIn className="w-3.5 h-3.5" />
+                                    로그인
+                                </button>
+                                <button
+                                    onClick={() => setIsLogin(false)}
+                                    className={`flex-1 py-2.5 text-[13px] font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${!isLogin ? 'bg-indigo-600 text-white shadow-lg scale-[1.02]' : 'text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    <UserPlus className="w-3.5 h-3.5" />
+                                    회원가입
+                                </button>
+                            </div>
+                        )}
+
                         {error && (
                             <div className="p-3 bg-red-900/30 border border-red-800/50 rounded-lg flex items-center gap-3 text-red-200 text-xs animate-shake">
                                 <AlertCircle className="w-4 h-4 shrink-0" />
@@ -377,18 +397,10 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                         </form>
 
                         <div className="text-center pt-2 border-t border-white/5">
-                            <p className="text-slate-500 text-[10px] mb-1">
-                                {isLogin ? '처음이신가요?' : (socialUser ? '기존 계정이 있으신가요?' : '이미 회원이신가요?')}
+                            <p className="text-slate-500 text-[9px] mb-1 italic">
+                                MBTI Tarot - 우주의 흐름을 읽다
                             </p>
-                            {!socialUser ? (
-                                <button
-                                    type="button"
-                                    onClick={() => setIsLogin(!isLogin)}
-                                    className={`text-[11px] font-bold transition-all hover:underline ${isLogin ? 'text-emerald-400 hover:text-emerald-300' : 'text-indigo-400 hover:text-indigo-300'}`}
-                                >
-                                    {isLogin ? '새로 가입하고 혜택받기' : '기존 계정으로 로그인'}
-                                </button>
-                            ) : (
+                            {socialUser && (
                                 <button
                                     type="button"
                                     onClick={async () => {
