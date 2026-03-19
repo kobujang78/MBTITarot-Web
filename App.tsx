@@ -37,6 +37,7 @@ import SelectionScreen from './components/SelectionScreen';
 import RevealScreen from './components/RevealScreen';
 import ReadingScreen from './components/ReadingScreen';
 import BottomNav from './components/BottomNav';
+import CookieConsent from './components/CookieConsent';
 
 const App: React.FC = () => {
   const { isAuthModalOpen, setIsAuthModalOpen, isShareModalOpen, setIsShareModalOpen, activeNotice, setActiveNotice, isMenuOpen, setIsMenuOpen, viewingCard, setViewingCard, activeTooltipId, setActiveTooltipId, isRetryModalOpen, setIsRetryModalOpen, showSplash, setShowSplash, spreadError, setSpreadError } = useUIState();
@@ -52,6 +53,40 @@ const App: React.FC = () => {
   useAppInitialization(setShowSplash);
   const readingRef = useRef<HTMLDivElement>(null);
   const moonData = getMoonData();
+
+  // Dynamic Meta Tags (SEO/AdSense Perfection)
+  React.useEffect(() => {
+    const metaDescriptions: Record<string, string> = {
+      [AppStep.INTRO]: "MBTI 성향별 맞춤 타로운세 - 오늘운세, 연애운, 금전운 무료 확인",
+      [AppStep.COMMUNITY]: "운명의 광장 - MBTI 타로 커뮤니티에서 고민을 나누고 해석을 공유하세요",
+      [AppStep.MBTI_ABOUT]: "MBTI 성격 유형 가이드 - 16가지 성격 유형의 특징과 타로 상성 분석",
+      [AppStep.TAROT_ABOUT]: "타로 카드 백과사전 - 78장 타로 카드의 의미와 해석 방법 안내",
+      [AppStep.SQUARE]: "타로 광장 - MBTI와 타로가 만나는 지점, 깊이 있는 인문학적 고찰",
+      [AppStep.HISTORY]: "나의 운명 기록 - 과거에 뽑았던 타로 결과와 흐름을 확인하세요",
+      [AppStep.READING]: "타로 해석 결과 - 당신의 MBTI 성향이 반영된 깊이 있는 운세 풀이"
+    };
+
+    const stepTitles: Record<string, string> = {
+      [AppStep.INTRO]: "MBTI 타로운세 - 홈",
+      [AppStep.COMMUNITY]: "커뮤니티 | MBTI 타로",
+      [AppStep.MBTI_ABOUT]: "MBTI 가이드 | MBTI 타로",
+      [AppStep.TAROT_ABOUT]: "타로 백과사전 | MBTI 타로",
+      [AppStep.SQUARE]: "타로 광장 | MBTI 타로",
+      [AppStep.HISTORY]: "운명 기록 | MBTI 타로",
+      [AppStep.READING]: "운세 해석 결과 | MBTI 타로",
+      [AppStep.MYPAGE]: "마이페이지 | MBTI 타로"
+    };
+
+    if (stepTitles[step]) {
+      document.title = `${stepTitles[step]} | mbtitarot.co.kr`;
+    }
+
+    const description = metaDescriptions[step] || metaDescriptions[AppStep.INTRO];
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', description);
+    }
+  }, [step]);
 
   // Handle incomplete profile for social login users
   React.useEffect(() => {
@@ -160,10 +195,13 @@ const App: React.FC = () => {
           <button onClick={() => setActiveNotice('tos')} className="hover:opacity-100 transition-opacity">이용약관</button>
           <span className="opacity-30">|</span>
           <button onClick={() => setActiveNotice('privacy')} className="hover:opacity-100 transition-opacity">개인정보 처리방침</button>
+          <span className="opacity-30">|</span>
+          <a href="mailto:honglabai@gmail.com" className="hover:opacity-100 transition-opacity">문의하기 (Contact)</a>
         </div>
-        <p className="text-white text-[9px] md:text-[11px] opacity-40">MBTI 타로운세 2026 / Powered by ⓒHongLabAI</p>
+        <p className="text-white text-[9px] md:text-[11px] opacity-40">MBTI 타로운세 2026 / Powered by ⓒHongLabAI - <span className="italic">All Rights Reserved</span></p>
       </footer>
 
+      <CookieConsent />
       <BottomNav
         currentStep={step}
         onStepChange={(newStep) => {

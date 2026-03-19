@@ -73,11 +73,23 @@ const PrivacyPolicy: React.FC = () => {
             </section>
 
             <section>
-                <h3 className="text-lg font-semibold text-slate-100 mb-2">8. 개인정보 보호 책임자 및 연락처</h3>
+                <h3 className="text-lg font-semibold text-slate-100 mb-2">8. Google AdSense 및 쿠키(Cookie) 관련 안내</h3>
+                <p>본 서비스는 광고 게재를 위해 Google AdSense를 이용하며, Google은 다음과 같은 방식으로 데이터를 처리합니다.</p>
+                <ul className="list-disc ml-5 space-y-1 mt-2">
+                    <li>Google을 포함한 제3자 제공업체는 사용자의 이전 웹사이트 방문 기록을 토대로 광고를 게재하기 위해 쿠키를 사용합니다.</li>
+                    <li>Google의 광고 쿠키 사용을 통해 Google과 그 파트너는 사용자의 본 사이트 및 다른 사이트 방문 기록을 토대로 효율적인 광고를 게재할 수 있습니다.</li>
+                    <li>이용자는 <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">사용자 설정</a>을 통해 맞춤 설정 광고를 해제할 수 있습니다.</li>
+                    <li>또한, <a href="https://www.aboutads.info/" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">www.aboutads.info</a>를 방문하여 맞춤 설정 광고에 사용되는 제3자 제공업체의 쿠키 사용을 차단할 수 있습니다.</li>
+                </ul>
+                <p className="mt-2 text-slate-400">자세한 내용은 <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">Google의 광고 정책 및 데이터 사용 방식</a>을 참조하시기 바랍니다.</p>
+            </section>
+
+            <section>
+                <h3 className="text-lg font-semibold text-slate-100 mb-2">9. 개인정보 보호 책임자 및 연락처</h3>
                 <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
                     <p><strong>성명:</strong> 홍은선</p>
-                    <p><strong>연락처/이메일:</strong> honglabai@gmail.com</p>
-                    <p className="mt-2 text-slate-400"><strong>시행 일자:</strong> 2025년 12월 25일</p>
+                    <p><strong>연락처/이메일:</strong> <a href="mailto:honglabai@gmail.com" className="hover:text-indigo-400 decoration-none">honglabai@gmail.com</a></p>
+                    <p className="mt-2 text-slate-400"><strong>최종 수정 일자:</strong> 2026년 3월 19일</p>
                 </div>
             </section>
         </div>

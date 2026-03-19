@@ -17,9 +17,9 @@ const RevealScreen: React.FC<RevealScreenProps> = ({ selectedSpread, selectedCar
         {selectedCards.map((card, index) => (
           <div key={card.id} className={`flex flex-col items-center animate-slideUp group w-full bg-slate-900/40 md:bg-transparent rounded-[1.5rem] md:rounded-none p-1 md:p-0 border border-slate-700/50 md:border-none shadow-md md:shadow-none backdrop-blur-md md:backdrop-blur-none`} style={{ animationDelay: `${index * 200}ms` }}>
             <h3 className="text-xs md:text-xl font-serif text-slate-300 font-bold mb-2 md:mb-4 tracking-widest uppercase drop-shadow-sm border-b-2 border-slate-700 pb-1">{card.position}</h3>
-            <div className="cursor-pointer group/card transition-all duration-300 hover:scale-105" onClick={() => setViewingCard(card)}>
+            <div className="cursor-pointer group/card transition-all duration-300 hover:scale-105 select-none" onClick={() => setViewingCard(card)}>
               <div className="w-28 h-[200px] sm:w-36 sm:h-64 rounded-xl overflow-hidden shadow-xl border border-slate-500/50 group-hover/card:border-slate-400 transition-all">
-                <img src={`/image/${String(card.id).padStart(2, '0')}.jpg`} alt={card.name} className={`w-full h-full object-cover ${card.isReversed ? 'rotate-180' : ''}`} />
+                <img src={`/image/${String(card.id).padStart(2, '0')}.jpg`} alt={`${card.nameKo} 타로 카드`} className={`w-full h-full object-cover ${card.isReversed ? 'rotate-180' : ''}`} />
               </div>
               <div className="text-center mt-2 animate-fadeIn"><h3 className="text-slate-200 font-serif text-sm font-bold tracking-wider">{card.nameKo.split('(')[0].trim()}</h3></div>
             </div>

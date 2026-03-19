@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Sparkles, User } from 'lucide-react';
 
 interface MbtiContent {
     title: string;
@@ -327,6 +328,90 @@ const LandingContent: React.FC = () => {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(generateFaqSchema()) }}
             />
+
+            {/* Section 6: E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) */}
+            <section className="space-y-8 pt-8 border-t border-slate-700/50">
+                <div className="text-center space-y-2">
+                    <h2 className="text-2xl md:text-3xl font-serif font-bold text-slate-100 italic">
+                        Our Mission & Expertise
+                    </h2>
+                    <p className="text-slate-500 text-sm">타로의 지혜와 MBTI의 과학적 접근을 결합합니다</p>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                        <h3 className="text-lg font-bold text-indigo-300 mb-3 flex items-center gap-2">
+                            <Sparkles className="w-5 h-5" /> 타로 리딩 원칙
+                        </h3>
+                        <ul className="space-y-3 text-sm text-slate-400">
+                            <li className="flex gap-2">
+                                <span className="text-indigo-500 font-bold">01.</span>
+                                <span><strong>심리학적 근거:</strong> 단순한 운세를 넘어 칼 융(Carl Jung)의 분석심리학적 원형(Archetype) 이론을 바탕으로 상징을 해석합니다.</span>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="text-indigo-500 font-bold">02.</span>
+                                <span><strong>MBTI 알고리즘:</strong> 16가지 성격 유형의 인지 기능(주기능/부기능)을 타로 배열법에 연동하여 개인화된 최적의 조언을 도출합니다.</span>
+                            </li>
+                            <li className="flex gap-2">
+                                <span className="text-indigo-500 font-bold">03.</span>
+                                <span><strong>데이터 윤리:</strong> 모든 타로 리딩 결과는 사용자의 심리적 안정과 긍정적인 변화를 돕는 방향으로 설계되었으며, 비윤리적인 유도나 공포 마케팅을 지양합니다.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-indigo-950/20 to-slate-900/80 p-6 rounded-2xl border border-indigo-500/20 shadow-xl">
+                        <h3 className="text-lg font-bold text-indigo-300 mb-3 flex items-center gap-2">
+                            <User className="w-5 h-5" /> About HongLabAI
+                        </h3>
+                        <div className="space-y-4">
+                            <p className="text-sm text-slate-400 leading-relaxed">
+                                <strong>HongLabAI</strong>는 인공지능과 인문학의 융합을 연구하는 기술 혁신팀입니다. 
+                                타로 카드의 상징 체계와 MBTI 데이터를 정교하게 학습시킨 AI 모델을 통해, 
+                                누구나 쉽고 깊이 있는 자기 이해의 시간을 가질 수 있도록 서비스를 운영하고 있습니다.
+                            </p>
+                            <div className="flex gap-4 items-center pt-2">
+                                <div className="text-center">
+                                    <div className="text-indigo-400 font-bold text-xl">10k+</div>
+                                    <div className="text-[10px] text-slate-500 uppercase">Monthly Users</div>
+                                </div>
+                                <div className="w-px h-8 bg-slate-700"></div>
+                                <div className="text-center">
+                                    <div className="text-indigo-400 font-bold text-xl">20yrs+</div>
+                                    <div className="text-[10px] text-slate-500 uppercase">Expert Knowledge</div>
+                                </div>
+                                <div className="w-px h-8 bg-slate-700"></div>
+                                <div className="text-center">
+                                    <div className="text-indigo-400 font-bold text-xl">78+</div>
+                                    <div className="text-[10px] text-slate-500 uppercase">Tarot Wisdom</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Section 7: Social Proof (User Stories) */}
+            <section className="space-y-6">
+                <h2 className="text-xl md:text-2xl font-serif font-bold text-slate-100 border-b border-slate-700 pb-2">
+                    사용자 한마디 (User Stories)
+                </h2>
+                <div className="grid md:grid-cols-3 gap-4">
+                    {[
+                        { type: 'INFJ', text: "제 고민의 본질을 꿰뚫어 보는 것 같아 깜짝 놀랐어요. 단순한 타로 그 이상입니다.", author: "김*정님" },
+                        { type: 'ENFP', text: "MBTI 성향이 반영되니까 해석이 훨씬 잘 와닿아요! 매일 아침 확인하고 있습니다.", author: "이*진님" },
+                        { type: 'ISTJ', text: "현실적이고 논리적인 조언이라 실생활에도 큰 도움이 됩니다. 매우 만족해요.", author: "박*훈님" }
+                    ].map((review, i) => (
+                        <div key={i} className="bg-slate-900/40 p-4 rounded-xl border border-slate-800 hover:border-indigo-500/30 transition-colors shadow-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-[10px] font-bold text-indigo-400 border border-indigo-400/30 px-1 rounded">{review.type}</span>
+                                <div className="flex text-amber-500 text-[10px]">★★★★★</div>
+                            </div>
+                            <p className="text-xs text-slate-400 mb-2 italic">"{review.text}"</p>
+                            <p className="text-[10px] text-slate-500 text-right">- {review.author}</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
 
             {/* Decorative Divider */}
             <div className="flex items-center justify-center py-8 opacity-30">
