@@ -102,16 +102,16 @@ const ReadingScreen: React.FC<ReadingScreenProps> = ({
               {isHistoryMode && <span className="absolute top-0 right-0 sm:static sm:mb-2 text-xs text-slate-400 border border-slate-600 rounded-full px-3 py-1 bg-slate-800 shadow-sm">📜 기록 열람 중</span>}
               <div className="flex items-center justify-center gap-3 mb-1">
                 <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
-                <span className="text-xl md:text-2xl font-sans font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-white to-slate-100 animate-shimmer tracking-widest uppercase drop-shadow-md">{selectedSpread.name}</span>
+                <span className="text-lg md:text-xl font-sans font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-white to-slate-100 animate-shimmer tracking-widest uppercase drop-shadow-md">{selectedSpread.name}</span>
                 <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
               </div>
-              {question && <h3 className="text-xl md:text-2xl font-sans font-bold text-slate-200 py-1 leading-tight drop-shadow-sm">"{question}"</h3>}
+              {question && <h3 className="text-lg md:text-xl font-sans font-bold text-slate-200 py-1 leading-tight drop-shadow-sm">"{question}"</h3>}
             </div>
 
             <div className="w-full max-w-4xl mx-auto">
               <div className="bg-slate-900/80 border border-slate-700/50 rounded-2xl backdrop-blur-xl overflow-hidden shadow-2xl min-h-[500px] flex flex-col relative transition-all duration-500">
                 <div className="px-4 py-3 border-b border-slate-700/50 bg-slate-900/50 text-center relative">
-                  <h3 className="text-xl md:text-2xl font-serif font-bold text-slate-100 drop-shadow-md">{readingSections[currentPage]?.title || "결과 분석"}</h3>
+                  <h3 className="text-lg md:text-xl font-serif font-bold text-slate-100 drop-shadow-md">{readingSections[currentPage]?.title || "결과 분석"}</h3>
                   <div className="flex justify-center gap-1.5 mt-2">
                     {readingSections.map((_, idx) => (
                       <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === currentPage ? 'bg-slate-200 w-3' : 'bg-slate-600'}`} />
@@ -122,10 +122,10 @@ const ReadingScreen: React.FC<ReadingScreenProps> = ({
                   <div className="animate-fadeIn">
                     <ReactMarkdown
                       components={{
-                        h1: ({ node, ...props }) => <h1 className="text-2xl md:text-3xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-white to-slate-300 mb-3 mt-1 font-bold border-b border-slate-700/50 pb-2 drop-shadow-sm" {...props} />,
-                        h2: ({ node, ...props }) => <h2 className="text-xl md:text-2xl font-serif text-slate-100 mb-3 mt-5 font-bold flex items-center gap-2 border-l-4 border-slate-600 pl-3 py-1 bg-slate-800/20 rounded-r-md drop-shadow-sm" {...props} />,
-                        h3: ({ node, ...props }) => <h3 className="text-lg md:text-xl font-serif text-slate-200 mb-2 mt-4 font-bold opacity-90" {...props} />,
-                        p: ({ node, ...props }) => <p className="text-slate-300 leading-relaxed mb-4 text-base md:text-lg font-normal tracking-wide break-keep" {...props} />,
+                        h1: ({ node, ...props }) => <h1 className="text-xl md:text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-white to-slate-300 mb-3 mt-1 font-bold border-b border-slate-700/50 pb-2 drop-shadow-sm" {...props} />,
+                        h2: ({ node, ...props }) => <h2 className="text-lg md:text-xl font-serif text-slate-100 mb-3 mt-5 font-bold flex items-center gap-2 border-l-4 border-slate-600 pl-3 py-1 bg-slate-800/20 rounded-r-md drop-shadow-sm" {...props} />,
+                        h3: ({ node, ...props }) => <h3 className="text-base md:text-lg font-serif text-slate-200 mb-2 mt-4 font-bold opacity-90" {...props} />,
+                        p: ({ node, ...props }) => <p className="text-slate-300 leading-relaxed mb-4 text-sm md:text-base font-normal tracking-wide break-keep" {...props} />,
                         strong: ({ node, ...props }) => <strong className="text-amber-200 font-bold drop-shadow-[0_0_1px_rgba(255,191,0,0.3)]" {...props} />,
                         li: ({ node, children, ...props }) => {
                           const text = String(children);
@@ -138,11 +138,11 @@ const ReadingScreen: React.FC<ReadingScreenProps> = ({
                               </button>
                             );
                           }
-                          return <li className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50 mb-2 list-none text-base md:text-lg text-slate-300" {...props}>{children}</li>
+                          return <li className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50 mb-2 list-none text-sm md:text-base text-slate-300" {...props}>{children}</li>
                         },
                         ul: ({ node, ...props }) => <ul className="space-y-1 my-2 pl-0" {...props} />,
                         hr: ({ node, ...props }) => <hr className="border-t border-slate-700 my-4" {...props} />,
-                        blockquote: ({ node, ...props }) => <blockquote className="border-l-2 border-slate-500 pl-3 italic text-slate-400 my-3 text-base" {...props} />,
+                        blockquote: ({ node, ...props }) => <blockquote className="border-l-2 border-slate-500 pl-3 italic text-slate-400 my-3 text-sm" {...props} />,
                       }}
                     >
                       {readingSections[currentPage]?.content || "내용을 불러오는 중입니다..."}
