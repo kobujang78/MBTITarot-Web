@@ -14,7 +14,30 @@ export const useUserSession = () => {
   const profileSubRef = useRef<any>(null);
   const isMountedRef = useRef(true);
 
-  // Load the user profile
+  // Keep currentUser in a ref for use in event listeners without dependency issues
+  const currentUserRef = useRef<any>(null);
+  useEffect(() => {
+    currentUserRef.current = currentUser;
+  }, [currentUser]);
+
+  /**
+   * Signs out the user and cleans up the session state.
+   */
+  const handleForcedLogout = useCallback(async () => {
+    // Only act if there is a current user to log out
+    if (!currentUserRef.current) return;
+
+    try {
+      console.log("Forcing logout due to app backgrounding or closure...");
+      await supabase.auth.signOut();
+      if (isMountedRef.current) {
+        setCurrentUser(null);
+        setUserProfile(null);
+      }
+    } catch (e) {
+      console.error("Forced logout failed:", e);
+    }
+  }, []);
 
   /**
    * Loads the user profile, retrying once if the first attempt fails.
@@ -62,6 +85,16 @@ export const useUserSession = () => {
 
   useEffect(() => {
     isMountedRef.current = true;
+
+    // 1. App State & Visibility Listeners for auto-logout
+    const appStateListener = App.addListener('appStateChange', ({ isActive }) => {
+      if (!isActive) handleForcedLogout();
+    });
+
+    const visibilityListener = () => {
+      if (document.visibilityState === 'hidden') handleForcedLogout();
+    };
+    document.addEventListener('visibilitychange', visibilityListener);
 
     // 2. Initialize Session
     const init = async () => {
@@ -129,10 +162,12 @@ export const useUserSession = () => {
 
     return () => {
       isMountedRef.current = false;
+      appStateListener.then(l => l.remove());
+      document.removeEventListener('visibilitychange', visibilityListener);
       subscription.unsubscribe();
       if (profileSubRef.current) profileSubRef.current.unsubscribe();
     };
-  }, [loadProfile, subscribeToProfile]);
+  }, [handleForcedLogout, loadProfile, subscribeToProfile]);
 
   // Periodic Refresh
   useEffect(() => {
