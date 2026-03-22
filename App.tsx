@@ -27,6 +27,7 @@ const MyPage = React.lazy(() => import('./components/MyPage'));
 const TermsOfService = React.lazy(() => import('./notice/TermsOfService'));
 const PrivacyPolicy = React.lazy(() => import('./notice/PrivacyPolicy'));
 const LandingContent = React.lazy(() => import('./components/LandingContent'));
+const MarketingStatus = React.lazy(() => import('./notice/MarketingStatus'));
 const MbtiAbout = React.lazy(() => import('./components/MbtiAbout'));
 const TarotAbout = React.lazy(() => import('./components/TarotAbout'));
 
@@ -95,8 +96,6 @@ const App: React.FC = () => {
     
     if (!isSessionLoading && !currentUser && isRestrictedStep) {
       setStep(AppStep.SQUARE);
-    } else if (!isSessionLoading && currentUser && step === AppStep.SQUARE) {
-      setStep(AppStep.INTRO);
     }
   }, [isSessionLoading, currentUser, step]);
 
@@ -112,12 +111,8 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, [isSessionLoading, currentUser, userProfile, isAuthModalOpen]);
 
-  // Auto-redirect to Intro after login if the user was on Landing Page
-  React.useEffect(() => {
-    if (currentUser && userProfile && step === AppStep.SQUARE) {
-      setStep(AppStep.INTRO);
-    }
-  }, [currentUser, userProfile, step]);
+  // Auto-redirect to Intro after login ONLY if the user was on a restricted page previously (handled by useEffect above)
+  // We remove the explicit SQUARE -> INTRO redirect to allow users to view the landing content after login
 
   const renderUserBadge = () => userProfile && (
     <div className="flex items-center gap-2 bg-slate-900/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/5 shadow-lg">
@@ -174,7 +169,7 @@ const App: React.FC = () => {
         {step === AppStep.COMMUNITY && <div className="w-full max-w-4xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">커뮤니티</h2></div><BoardList key={boardRefreshKey} onPostClick={setSelectedPost} onWriteClick={() => currentUser ? setIsPostEditorOpen(true) : setIsAuthModalOpen(true)} /></div>}
         {step === AppStep.MBTI_ABOUT && <div className="w-full max-w-4xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">MBTI 가이드</h2></div><MbtiAbout /></div>}
         {step === AppStep.TAROT_ABOUT && <div className="w-full max-w-5xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">타로 가이드</h2></div><TarotAbout /></div>}
-        {step === AppStep.SQUARE && <div className="w-full max-w-5xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">타로광장</h2></div><Suspense fallback={<div className="flex items-center justify-center p-20"><Sparkles className="w-8 h-8 animate-spin text-indigo-400" /></div>}><LandingContent onStart={() => setIsAuthModalOpen(true)} /></Suspense></div>}
+        {step === AppStep.SQUARE && <div className="w-full max-w-5xl mx-auto pb-24"><div className="flex items-center gap-4 mb-6 px-4 pt-12"><button onClick={() => setStep(AppStep.INTRO)} className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700"><ArrowLeft className="w-5 h-5" /></button><h2 className="text-xl font-bold text-white">타로광장</h2></div><Suspense fallback={<div className="flex items-center justify-center p-20"><Sparkles className="w-8 h-8 animate-spin text-indigo-400" /></div>}><LandingContent onStart={() => currentUser ? setStep(AppStep.INTRO) : setIsAuthModalOpen(true)} /></Suspense></div>}
       </main>
 
       {viewingCard && (
@@ -190,8 +185,26 @@ const App: React.FC = () => {
       {activeNotice && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn" onClick={() => setActiveNotice(null)}>
           <div className="relative w-full max-w-2xl bg-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-slate-700" onClick={e => e.stopPropagation()}>
-            <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 sticky top-0 z-10"><div className="flex items-center gap-2">{activeNotice === 'tos' ? <FileText className="w-5 h-5 text-indigo-400" /> : <ShieldCheck className="w-5 h-5 text-emerald-400" />}<h3 className="text-xl font-bold text-slate-200">{activeNotice === 'tos' ? '이용약관' : '개인정보 처리방침'}</h3></div><button onClick={() => setActiveNotice(null)} className="p-2 hover:bg-slate-700 rounded-full"><X className="w-5 h-5 text-slate-400" /></button></div>
-            <div className="overflow-y-auto p-6 md:p-8 custom-scrollbar bg-slate-800"><Suspense fallback={<div />} >{activeNotice === 'tos' ? <TermsOfService /> : <PrivacyPolicy />}</Suspense></div>
+            <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 sticky top-0 z-10">
+              <div className="flex items-center gap-2">
+                {activeNotice === 'tos' ? <FileText className="w-5 h-5 text-indigo-400" /> : 
+                 activeNotice === 'marketing' ? <Sparkles className="w-5 h-5 text-amber-400" /> :
+                 <ShieldCheck className="w-5 h-5 text-emerald-400" />}
+                <h3 className="text-xl font-bold text-slate-200">
+                  {activeNotice === 'tos' ? '이용약관' : 
+                   activeNotice === 'marketing' ? '마케팅 정보 수신 동의' :
+                   '개인정보 처리방침'}
+                </h3>
+              </div>
+              <button onClick={() => setActiveNotice(null)} className="p-2 hover:bg-slate-700 rounded-full"><X className="w-5 h-5 text-slate-400" /></button>
+            </div>
+            <div className="overflow-y-auto p-6 md:p-8 custom-scrollbar bg-slate-800">
+              <Suspense fallback={<div />} >
+                {activeNotice === 'tos' ? <TermsOfService /> : 
+                 activeNotice === 'marketing' ? <MarketingStatus /> :
+                 <PrivacyPolicy />}
+              </Suspense>
+            </div>
             <div className="p-4 border-t border-slate-700 bg-slate-900 flex justify-end"><button onClick={() => setActiveNotice(null)} className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg">닫기</button></div>
           </div>
         </div>

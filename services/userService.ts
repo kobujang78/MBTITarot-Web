@@ -44,7 +44,8 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
             referredBy: data.referred_by,
             lastLoginDate: data.last_login_date,
             createdAt: new Date(data.created_at).getTime(),
-            totalCount: data.total_count
+            totalCount: data.total_count,
+            marketingConsent: data.marketing_consent
         } as UserProfile;
     }
     return null;
@@ -58,7 +59,8 @@ export const registerUser = async (
     email: string,
     nickname: string,
     mbti: string,
-    referrerNickname?: string
+    referrerNickname?: string,
+    marketingConsent?: boolean
 ) => {
     let initialCrystals = CRYSTALS_CONFIG.INITIAL;
     let referrerUid = null;
@@ -100,7 +102,8 @@ export const registerUser = async (
         crystals: initialCrystals,
         referred_by: referrerNickname || null,
         last_login_date: new Date().toISOString().split('T')[0],
-        total_count: 1
+        total_count: 1,
+        marketing_consent: marketingConsent
     };
 
     const { error } = await supabase
@@ -188,11 +191,12 @@ export const incrementVisitCount = async (uid: string) => {
  */
 export const updateUserProfile = async (
     uid: string,
-    data: { nickname?: string, mbti?: string }
+    data: { nickname?: string, mbti?: string, marketingConsent?: boolean }
 ): Promise<void> => {
     const updateData: any = {};
     if (data.nickname) updateData.nickname = data.nickname;
     if (data.mbti) updateData.mbti = data.mbti;
+    if (data.marketingConsent !== undefined) updateData.marketing_consent = data.marketingConsent;
 
     const { error } = await supabase
         .from('profiles')

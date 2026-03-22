@@ -339,6 +339,36 @@ const MyPage: React.FC<MyPageProps> = React.memo(({ userProfile, onBack }) => {
                 </div>
             </div>
 
+            {/* Marketing Consent Toggle */}
+            <div className="mb-4 bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                        <Sparkles className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <div>
+                        <h4 className="text-[13px] font-bold text-slate-200">마케팅 정보 수신</h4>
+                        <p className="text-[10px] text-slate-500">이벤트 및 혜택 알림 (선택)</p>
+                    </div>
+                </div>
+                <button
+                    onClick={async () => {
+                        const newValue = !userProfile.marketingConsent;
+                        await updateUserProfile(userProfile.uid, { marketingConsent: newValue });
+                    }}
+                    className={`
+                        relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none
+                        ${userProfile.marketingConsent ? 'bg-indigo-600' : 'bg-slate-700'}
+                    `}
+                >
+                    <span
+                        className={`
+                            inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                            ${userProfile.marketingConsent ? 'translate-x-6' : 'translate-x-1'}
+                        `}
+                    />
+                </button>
+            </div>
+
             {/* Actions */}
             <div className="flex flex-row gap-2">
                 <Button

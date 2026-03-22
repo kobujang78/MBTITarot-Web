@@ -67,6 +67,7 @@ export interface UserProfile {
   lastLoginDate?: string; // YYYY-MM-DD
   createdAt: number;
   totalCount: number;
+  marketingConsent?: boolean;
 }
 
 export const CRYSTALS_CONFIG = {

@@ -34,7 +34,7 @@ const TarotAbout: React.FC = () => {
         // Determine image URL - assuming local images follow a naming convention or referencing externally if previously set up
         // In this project, images seem to be referenced via ID (e.g., /image/0.jpg) based on previous context memory, 
         // or just using the ID. Let's try to assume /image/{id}.jpg format which is common in this project history.
-        const imageUrl = `/image/${selectedCard.id}.jpg`;
+        const imageUrl = `/image/${String(selectedCard.id).padStart(2, '0')}.jpg`;
 
         return (
             <div className="w-full max-w-3xl mx-auto px-4 py-6 md:py-10 animate-fade-in">
@@ -98,7 +98,7 @@ const TarotAbout: React.FC = () => {
                     >
                         <div className="w-full aspect-[2/3] rounded-lg overflow-hidden border border-white/10 relative shadow-lg group-hover:border-sky-400 transition-all duration-300 group-hover:-translate-y-1">
                             <img
-                                src={`/image/${card.id}.jpg`}
+                                src={`/image/${String(card.id).padStart(2, '0')}.jpg`}
                                 alt={card.nameKo}
                                 className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                 loading="lazy"

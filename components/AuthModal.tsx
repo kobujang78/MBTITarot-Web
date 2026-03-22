@@ -7,7 +7,7 @@ import Button from './Button';
 interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onShowNotice?: (type: 'tos' | 'privacy') => void;
+    onShowNotice?: (type: 'tos' | 'privacy' | 'marketing') => void;
 }
 
 const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onShowNotice }) => {
@@ -20,6 +20,7 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
     const [referrer, setReferrer] = useState('');
     const [agreedTos, setAgreedTos] = useState(false);
     const [agreedPrivacy, setAgreedPrivacy] = useState(false);
+    const [agreedMarketing, setAgreedMarketing] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [socialUser, setSocialUser] = useState<any>(null); // For completing social profile
@@ -33,6 +34,7 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
             setConfirmPassword('');
             setAgreedTos(false);
             setAgreedPrivacy(false);
+            setAgreedMarketing(false);
             setSocialUser(null);
         }
     }, [isOpen]);
@@ -82,7 +84,7 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                 const exists = await checkNicknameExists(nickname);
                 if (exists) throw new Error('이미 사용 중인 닉네임입니다.');
 
-                await registerUser(socialUser.id, socialUser.email || '', nickname, mbti, referrer);
+                await registerUser(socialUser.id, socialUser.email || '', nickname, mbti, referrer, agreedMarketing);
                 onClose();
             } else if (isLogin) {
                 const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -113,7 +115,8 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                         data: {
                             nickname,
                             mbti,
-                            referrer
+                            referrer,
+                            marketingConsent: agreedMarketing
                         }
                     }
                 });
@@ -382,6 +385,10 @@ const AuthModal: React.FC<AuthModalProps> = React.memo(({ isOpen, onClose, onSho
                                         <div className="flex items-center gap-2">
                                             <input type="checkbox" id="privacy" checked={agreedPrivacy} onChange={e => setAgreedPrivacy(e.target.checked)} className="w-3 h-3 rounded border-slate-700 bg-slate-800 text-emerald-500" />
                                             <label htmlFor="privacy" className="text-[10px] text-slate-500"><button type="button" onClick={() => onShowNotice?.('privacy')} className="text-slate-400 hover:underline">개인정보 처리방침</button> 동의 (필수)</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" id="marketing" checked={agreedMarketing} onChange={e => setAgreedMarketing(e.target.checked)} className="w-3 h-3 rounded border-slate-700 bg-slate-800 text-amber-500" />
+                                            <label htmlFor="marketing" className="text-[10px] text-slate-500"><button type="button" onClick={() => onShowNotice?.('marketing')} className="text-slate-400 hover:underline">마케팅 정보 수신</button> 동의 (선택)</label>
                                         </div>
                                     </div>
                                 </div>
